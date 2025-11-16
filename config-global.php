@@ -80,7 +80,7 @@ define('TIME_HASH', IS_PROD ? date('YmdH') : date('YmdHis'));
 
 # Project root
 $docroot = $_SERVER['DOCUMENT_ROOT'] ?? '';
-if ($docroot === '') $docroot = dirname(__DIR__);
+if ($docroot === '') $docroot = __DIR__;
 define('PROJ_ROOT', rtrim($docroot, '/\\'));
 
 # Core (components location)
@@ -135,6 +135,7 @@ if (!IS_CRON)
     if (session_id() == '') session_start();
     #setcookie(session_name(), session_id(), time() + PHP_SESSION_LIFETIME, '/');
 }
+else $_SESSION = array()
 
 # Logging
 
