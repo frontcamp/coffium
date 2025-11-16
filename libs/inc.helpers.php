@@ -44,8 +44,8 @@ if (isset($_REQUEST['dump-post'])) ndump('$_POST', $_POST);
 if (isset($_REQUEST['dump-request'])) ndump('$_REQUEST', $_REQUEST);
 if (isset($_REQUEST['dump-server'])) ndump('$_SERVER', $_SERVER);
 if (isset($_REQUEST['dump-session'])) ndump('$_SESSION', $_SESSION);
-if (isset($_REQUEST['dump-sys'])) ndump('$SYS', $SYS);
-if (isset($_REQUEST['dump-system'])) ndump('$SYS', $SYS);
+if (isset($_REQUEST['dump-sys'])
+ or isset($_REQUEST['dump-system'])) ndump('$SYS', $SYS);
 if (isset($_REQUEST['dump-variables'])
  or isset($_REQUEST['dump-vars'])) ndump('VARIABLES', get_defined_vars());
 

@@ -13,22 +13,22 @@ define('HDL_INIT', 16);  # Force static files to be at the top of stack
 # HDL_INIT flag instructs to put handler static files to the initial sub-stack and
 # then push every next flagged handler static files to the end of this sub-stack
 
-define('HDL_CSS_JS', HDL_CSS | HDL_JS);
+define('HDL_CSS_JS',      HDL_CSS | HDL_JS);
 
-define('HDL_ACT_CSS', HDL_ACT | HDL_CSS);
-define('HDL_ACT_JS', HDL_ACT | HDL_JS);
-define('HDL_ACT_CSS_JS', HDL_ACT | HDL_CSS | HDL_JS);
+define('HDL_ACT_CSS',     HDL_ACT | HDL_CSS);
+define('HDL_ACT_JS',      HDL_ACT | HDL_JS);
+define('HDL_ACT_CSS_JS',  HDL_ACT | HDL_CSS | HDL_JS);
 
-define('HDL_TPL_CSS', HDL_TPL | HDL_CSS);
-define('HDL_TPL_JS', HDL_TPL | HDL_CSS);
-define('HDL_TPL_CSS_JS', HDL_TPL | HDL_CSS | HDL_JS);
+define('HDL_TPL_CSS',     HDL_TPL | HDL_CSS);
+define('HDL_TPL_JS',      HDL_TPL | HDL_JS);
+define('HDL_TPL_CSS_JS',  HDL_TPL | HDL_CSS | HDL_JS);
 
-define('HDL_ACT_TPL', HDL_ACT | HDL_TPL);
+define('HDL_ACT_TPL',     HDL_ACT | HDL_TPL);
 define('HDL_ACT_TPL_CSS', HDL_ACT | HDL_TPL | HDL_CSS);
-define('HDL_ACT_TPL_JS', HDL_ACT | HDL_TPL | HDL_JS);
-define('HDL_ACT_TPL_CSS_JS', HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS);
+define('HDL_ACT_TPL_JS',  HDL_ACT | HDL_TPL | HDL_JS);
 
-define('HDL_ALL', HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS);
+define('HDL_ACT_TPL_CSS_JS', HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS);
+define('HDL_ALL', HDL_ACT_TPL_CSS_JS);  # synonym
 
 define('DEF_HDL_FNAME', 'default');
 define('COM_INI_FNAME', '__init__.php');
@@ -78,7 +78,9 @@ function store_route_root()
 function hdl_to_str(int $flags)
 {
     if ($flags === HDL_NONE) return '<none>';
-    if ($flags >= HDL_ALL) return '<all>';
+
+    if (($flags & HDL_ALL) === HDL_ALL) return '<all>';
+
     $s = '';
     if ($flags & HDL_ACT) $s .= '|act';
     if ($flags & HDL_TPL) $s .= '|tpl';
@@ -128,9 +130,8 @@ function route_std_path(string $path)
 {
     $dtos = str_replace('.', '/', $path);  # replace "." to "/"
 
-    # no double slashes allowed
+    # no double slashes allowed: truncate at the first occurrence of "//"
     $nodbl = (false === $p = strpos($dtos, '//')) ? $dtos : substr($dtos, 0, $p);
-    if (false === $nodbl) $nodbl = '';
 
     $result = '/'.trim($nodbl, '/\\');
     return ($result != '/') ? $result : '';
@@ -157,7 +158,7 @@ function core_use_api($target_path)
 
         # LNG files can be on any level
         if (ML_DIR_SUPPORT
-        and !sys_opt_has_value('lng.loaded', $lng_path.'/*')
+        and !sys_opt_has_value('lng.loaded', $lng_path)
         and is_dir($lng_path))
         {
             load_translations($lng_path);
@@ -214,6 +215,14 @@ function core_use_api($target_path)
 # >by default output buffering and extracting vars are turned off
 # >those parameters inaccessible from handler itself
 #
+# Return value:
+#   false  - no handler files found (according to $flags)
+#   true   - handler found, but CORE_RETURN_OUTPUT is not set
+#   string - handler found and output buffer returned (CORE_RETURN_OUTPUT=true)
+#
+# IMPORTANT: always check result with strict comparison (=== false / === true)
+#            to distinguish boolean and string results.
+#
 function core_use_handler(string $path,
                            array &$CONTEXT = array(),
                              int $flags = HDL_ALL | HDL_ASC_DEF | HDL_TRY_DEF,
@@ -227,7 +236,7 @@ function core_use_handler(string $path,
     $path = route_std_path($path);
 
     # check handler type flags
-    if (!($flags & HDL_ACT or $flags & HDL_TPL or $flags & HDL_CSS or $flags & HDL_JS)) {
+    if (!( $flags & (HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS) )) {
         trigger_error('Target handler type undefined!', E_USER_WARNING);
     }
 
@@ -337,12 +346,15 @@ function core_use_handler(string $path,
                 })($handler_found, $act_path, $tpl_path, $CONTEXT, $handler_return);
             }
             #
-            # Note: non empty $handler_return means that hander has been found!
+            # Note: non-null $handler_return means that handler has been found
+            #       and output buffering with CORE_RETURN_OUTPUT was enabled.
             # In this case we're using it as an indicator of success.
-            # PROBLEM potentially can appear if hander return empty string,
-            # this can be interpreted later as FALSE result, so to avoid this
-            # use strict comparison (=== or is_null()) instead of weak (==)
-            # analyzing core_use_handler() function.
+            # Result:
+            #   false  - handler not found
+            #   true   - handler found, but nothing returned (no buffer result)
+            #   string - handler found and its buffered output returned
+            # IMPORTANT: when checking result, use strict comparison:
+            #   if (false === core_use_handler(...)) { /* not found */ }
             #
             return !is_null($handler_return) ? $handler_return : boolval($handler_found);
         }
@@ -410,7 +422,7 @@ function static_url_path($tpl_path=NULL)
  * @var tpl_path string Path to the target template (or use script's __DIR__)
  * @return       string URL root to static folder (w/o tailing slash)
  */
-function static_url_root($tpl_path='')
+function static_url_root($tpl_path=NULL)
 {
     return sys_opt_get('request', 'root') . static_url_path($tpl_path);
 }

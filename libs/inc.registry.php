@@ -1,11 +1,11 @@
 <?php
 defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
-/* System registry API ($SYS) */
-
 /*
+System registry API ($SYS)
+
 P_NULL - pseudo NULL value
-is_pnull(v) - sheck if v identical (===) to P_NULL
+is_pnull(v) - check if v identical (===) to P_NULL
 
 restore_system_registry()
 set_system_registry($new_sys=NULL, $auto_store=true)
@@ -32,7 +32,7 @@ sys_remove_all(v) - remove all occurrences of a given value [-strict]
 sys_same(k,v) - alias to sys_check() with turned on strict flag
 sys_search(v) - find first instance of v and return its key, null otherwise
 sys_set(k,v) - alias to sys_add()
-sys_shift() - extract fist value of array
+sys_shift() - extract first value of array
 sys_unshift(v) - add value to the beginning of an array
 sys_unshift_unique(v) - add unique value to the beginning of an array
 sys_values() - return a list of all values
@@ -45,7 +45,7 @@ sys_opt_check(o,k,v) - check key exists and its value equal [-strict]
 sys_opt_clear(o) - clear an array
 sys_opt_count(o) - return elements count
 sys_opt_delete(o,k) - delete pointed key
-sys_opt_equal(o,k,v) - alias to sys_check() with turned off strict flag
+sys_opt_equal(o,k,v) - alias to sys_opt_check() with strict flag disabled
 sys_opt_get(o,k) - return value by key, or P_NULL if does not exist
 sys_opt_has_key(o,k) - checks if a key exists in an array
 sys_opt_has_value(o,v) - checks if a value exists in an array
@@ -56,10 +56,10 @@ sys_opt_push(o,v) - push one or more elements onto the end of array
 sys_opt_push_unique(o,v) - push one or more unique elements onto the end of array
 sys_opt_remove(o,v) - remove 1st occurrence of a given value [-strict]
 sys_opt_remove_all(o,v) - remove all occurrences of a given value [-strict]
-sys_opt_same(o,k,v) - alias to sys_check() with turned on strict flag
+sys_opt_same(o,k,v) - alias to sys_opt_check() with strict flag enabled
 sys_opt_search(o,v) - find first instance of v and return its key, null otherwise
-sys_opt_set(o,k,v) - alias to sys_add()
-sys_opt_shift(o) - extract fist value of array
+sys_opt_set(o,k,v) - alias to sys_opt_add()
+sys_opt_shift(o) - extract first value of array
 sys_opt_unshift(o,v) - add value to the beginning of an array
 sys_opt_unshift_unique(o,v) - add unique value to the beginning of an array
 sys_opt_values(o) - return a list of all values
@@ -73,7 +73,7 @@ if (!defined('P_NULL'))
     function is_pnull($value) { return $value === P_NULL; }
 }
 
-/*******************************************************************************
+/**
  * Common
  */
 
@@ -108,7 +108,7 @@ function sys_hash()
     return md5(serialize($SYS));
 }
 
-/*******************************************************************************
+/**
  * Top (1st) level API
  */
 
@@ -124,15 +124,15 @@ function sys($key, $val=P_NULL)
 function sys_add($key, $val, bool $overwrite=true)
 {
     global $SYS;
-    if (!array_key_exists($key, $SYS) or $overwrite) $SYS[$key] = $val;
+    if (!array_key_exists($key, $SYS) || $overwrite) $SYS[$key] = $val;
 }
 
 function sys_check($key, $val, $strict=false)
 {
     global $SYS;
     return array_key_exists($key, $SYS)
-       and (($strict === false and $SYS[$key] == $val)
-        or ($strict === true and $SYS[$key] === $val));
+       && (($strict === false && $SYS[$key] == $val)
+        || ($strict === true && $SYS[$key] === $val));
 }
 
 function sys_clear() { $GLOBALS['SYS'] = array(); }
@@ -213,14 +213,14 @@ function sys_unshift_unique(...$vals)
 
 function sys_values() { return array_values($GLOBALS['SYS']); }
 
-/*******************************************************************************
+/**
  * Sub (2nd) level API aka "options" (opt, opts)
  */
 
 function _ensure_opt_array($opt)
 {
     global $SYS;
-    if (!array_key_exists($opt, $SYS) or !is_array($SYS[$opt])) {
+    if (!array_key_exists($opt, $SYS) || !is_array($SYS[$opt])) {
         $SYS[$opt] = array();
     }
 }
@@ -238,7 +238,7 @@ function sys_opt_add($opt, $key, $val, bool $overwrite=true)
 {
     global $SYS;
     _ensure_opt_array($opt);
-    if (!array_key_exists($key, $SYS[$opt]) or $overwrite) $SYS[$opt][$key] = $val;
+    if (!array_key_exists($key, $SYS[$opt]) || $overwrite) $SYS[$opt][$key] = $val;
 }
 
 function sys_opt_check($opt, $key, $val, $strict=false)
@@ -246,8 +246,8 @@ function sys_opt_check($opt, $key, $val, $strict=false)
     global $SYS;
     _ensure_opt_array($opt);
     return array_key_exists($key, $SYS[$opt])
-       and (($strict === false and $SYS[$opt][$key] == $val)
-        or ($strict === true and $SYS[$opt][$key] === $val));
+       && (($strict === false && $SYS[$opt][$key] == $val)
+        || ($strict === true && $SYS[$opt][$key] === $val));
 }
 
 function sys_opt_clear($opt)

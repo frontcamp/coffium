@@ -22,8 +22,8 @@ define('CORE_VERSION', '0.4');
 #
 # Project
 
-define('ML_URL_SUPPORT', true);  # skip 1st request part, like: domain/en-us/..
-define('ML_DIR_SUPPORT', true);  # auto load /d1/d2/_lang/<name>.php files
+define('ML_URL_SUPPORT', false);  # skip 1st request part, like: domain/en-us/..
+define('ML_DIR_SUPPORT', true);   # auto load /d1/d2/_lang/<name>.php files
 
 
 /**
@@ -135,7 +135,7 @@ if (!IS_CRON)
     if (session_id() == '') session_start();
     #setcookie(session_name(), session_id(), time() + PHP_SESSION_LIFETIME, '/');
 }
-else $_SESSION = array()
+else $_SESSION = array();
 
 # Logging
 

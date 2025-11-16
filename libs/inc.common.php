@@ -14,20 +14,22 @@ function bool_to_yesno($b) { return $b === true ? 'Yes' : 'No'; }
 function int_to_bool($i) { return $i >= 1 ? true : false; }
 
 
+// Returns a new empty array *by reference*
+// so it can be passed to functions expecting `array &...` parameters.
 function &empty_array() { $a = array(); return $a; }
 
 
 function file_get_data($file_path, $var_name='DATA')
 {
-    if (!file_exists($file_path))
+    if (!is_file($file_path))
     {
-        trigger_error('Data file not exists: '.$file_path, E_USER_ERROR);
+        trigger_error('Data file does not exist: '.$file_path, E_USER_ERROR);
         die();
     }
     include($file_path);
     if (!isset($$var_name))
     {
-        trigger_error('Data variable absent: '.$var_name, E_USER_ERROR);
+        trigger_error('Data variable is absent: '.$var_name, E_USER_ERROR);
         die();
     }
     return $$var_name;
@@ -37,14 +39,14 @@ function file_get_data($file_path, $var_name='DATA')
 function file_put_data($file_path, $data, $var_name='DATA')
 {
     $s = "<?php\n\n$".$var_name.' = '.var_export($data, true).";\n\n";
-    file_put_contents($file_path, $s);
+    file_put_contents($file_path, $s, LOCK_EX);
 }
 
 
-function is_float_or_int($value) { return (is_float($value) or is_int($value)); }
-function is_int_or_float($value) { return (is_int($value) or is_float($value)); }
+function is_float_or_int($value) { return (is_float($value) || is_int($value)); }
+function is_int_or_float($value) { return (is_int($value) || is_float($value)); }
 
-function is_decimal($value) { return (false !== strpos($value, '.')); }
+function is_decimal(string $value) { return (false !== strpos($value, '.')); }
 
 
 /* Return true if the value is an integer or a string representing an integer, false otherwise */
@@ -52,7 +54,9 @@ function is_int_adv($value)
 {
     if (is_int($value)) return true;
     if (!is_string($value)) return false;
-    return str_starts_with($value, '-') ? ctype_digit(substr($value, 1)) : ctype_digit($value);
+    $morp = str_starts_with($value, '-')
+         || str_starts_with($value, '+');
+    return $morp ? ctype_digit(substr($value, 1)) : ctype_digit($value);
 }
 
 
@@ -67,7 +71,7 @@ function ntrim($value, $min, $max)
 
 function redirect($location, $status = 302, $x_redirect_by=CORE_NAME)
 {
-    if (!is_int($status) or $status < 300 or $status > 399) {
+    if (!is_int($status) || $status < 300 || $status > 399) {
         trigger_error('HTTP redirect status code must be a redirection code, 3xx.', E_USER_ERROR);
     } elseif (!headers_sent()) {  # HTTP redirection
         if (is_string($x_redirect_by)) header('X-Redirect-By: '.$x_redirect_by);
@@ -88,10 +92,11 @@ function reload()
 function rmtree($path)
 {
     if (!is_dir($path)) return;
-    $d = opendir($path);
+    $d = @opendir($path);
+    if ($d === false) return;  # handle error
     while (false !== ($name = readdir($d)))
     {
-        if (($name != '.') and ($name != '..'))
+        if (($name != '.') && ($name != '..'))
         {
             $p = $path.'/'.$name;
             if (is_dir($p)) rmtree($p); else unlink($p);
@@ -106,15 +111,19 @@ function rmtree($path)
  * List files and directories inside the specified path
  * This function:
  * + removes "." and ".."
- * + sort folders first
- * + natsort folder and file names
+ * + sorts folders first
+ * + applies natsort to folder and file names
  */
 function scandir_advanced($path)
 {
     $path = str_replace('\\', '/', $path);  # fix Windows dir separators
     $path = rtrim($path, '/\\');            # remove ending slash
 
-    if (!is_dir($path)) trigger_error("Invalid path to scan! ($path)", E_USER_ERROR);
+    if (!is_dir($path))
+    {
+        trigger_error("Invalid path to scan! ($path)", E_USER_ERROR);
+        return array();
+    }
 
     $files = scandir($path, SCANDIR_SORT_ASCENDING);
 
@@ -122,7 +131,7 @@ function scandir_advanced($path)
     $just_files = array();
     foreach ($files as $fname)
     {
-        if ($fname == '.' or $fname == '..') continue;
+        if ($fname == '.' || $fname == '..') continue;
         $abs_path = $path.'/'.$fname;
         if (is_dir($abs_path)) array_push($just_folders, $fname);
         if (is_file($abs_path)) array_push($just_files, $fname);
@@ -135,13 +144,13 @@ function scandir_advanced($path)
 
 function get_client_ip()
 {
-    $ip = '';
     if (isset($_SERVER['HTTP_CLIENT_IP'])
-    and filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP))
+     && filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP))
     {
-        $ip = $_SERVER['HTTP_CLIENT_IP'];
+        return $_SERVER['HTTP_CLIENT_IP'];
     }
-    elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
     {
         // split addresses and get 1st
         $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
@@ -150,16 +159,17 @@ function get_client_ip()
             $ip_address = trim($ip_address); // remove spaces
             if (filter_var($ip_address, FILTER_VALIDATE_IP))
             {
-                $ip = $ip_address;
-                break;
+                return $ip_address;
             }
         }
     }
-    elseif (isset($_SERVER['REMOTE_ADDR'])
-       and filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP))
+
+    if (isset($_SERVER['REMOTE_ADDR'])
+     && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP))
     {
-        $ip = $_SERVER['REMOTE_ADDR'];
+        return $_SERVER['REMOTE_ADDR'];
     }
-    return $ip;
+
+    return '';
 }
 
