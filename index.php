@@ -96,19 +96,19 @@ function core_unlock() { file_put_contents(ET_FLAG_FILE, ''); }
 #
 # Handle locked core (applies only to non VIP users!)
 
-if (core_locked() and !IS_VIP) die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
+if (core_locked() && !IS_VIP) die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
 
 #
 # Maintenance schedule (PROD only!)
 
-if (defined('ET_SYSMNT_FROM_HR') and defined('ET_SYSMNT_TO_HR') and IS_PROD)
+if (defined('ET_SYSMNT_FROM_HR') && defined('ET_SYSMNT_TO_HR') && IS_PROD)
 {
     $ET_FROM = new DateTime();
     $ET_FROM->setTime(ET_SYSMNT_FROM_HR, 0);
     $ET_TO = new DateTime();
     $ET_TO->setTime(ET_SYSMNT_TO_HR, 0);
     $ET_NOW = new DateTime();
-    if ($ET_FROM <= $ET_NOW and $ET_NOW <= $ET_TO and !IS_VIP) {
+    if ($ET_FROM <= $ET_NOW && $ET_NOW <= $ET_TO && !IS_VIP) {
         die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
     }
 }
@@ -118,7 +118,7 @@ if (defined('ET_SYSMNT_FROM_HR') and defined('ET_SYSMNT_TO_HR') and IS_PROD)
 
 $is_ready = file_exists(ET_FLAG_FILE);
 $is_code = is_dir(CODE_ROOT);
-if ((!$is_ready or !$is_code) and !(IS_VIP and $is_code))
+if ((!$is_ready || !$is_code) && !(IS_VIP && $is_code))
 {
     die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
 }
@@ -135,7 +135,7 @@ core_use_handler(sys_get('route.path'));
  * Finalization
  */
 
-function core_register_finalizer($func_name)
+function core_register_finalizer(callable $func_name)
 {
     global $_FINALIZERS;
     array_push($_FINALIZERS, $func_name);
@@ -144,7 +144,7 @@ function core_register_finalizer($func_name)
 #
 # Run finalization functions
 
-foreach($_FINALIZERS as $finalizer)
+foreach ($_FINALIZERS as $finalizer)
 {
     if (is_callable($finalizer)) $finalizer();
 }
@@ -161,14 +161,14 @@ $prt = core_timer('PROC_RUN_TIMER');
 $pgt = core_timer('PAGE_GEN_TIMER');
 $dlt = number_format($prt - $pgt, 4);
 
-if (IS_VIP and isset($_REQUEST['verbose']))
+if (IS_VIP && isset($_REQUEST['verbose']))
 {
     print("PHP process run time: <b>$prt sec</b>; ");
     print("page generation time: <b>$pgt sec</b>; ");
     print("PHP process overhead: <b>$dlt sec</b>.\n");
 }
 
-if(IS_VIP and isset($_REQUEST['profiling']))
+if (IS_VIP && isset($_REQUEST['profiling']))
 {
     dump_js_log('PHP process run time: '.$prt.' sec.');
     dump_js_log('Page generation time: '.$pgt.' sec.');

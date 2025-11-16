@@ -2,7 +2,8 @@
 defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 
-/*
+
+/**
  * Server-dependent configuration
  * (environment-specific DB and other settings)
  *
@@ -34,6 +35,6 @@ elseif (IS_PROD)  # production server
 
 if (IS_CRON)  # CRON task
 {
-    TODO: cron-specific overrides (DB, logging, limits, etc.)
+    // TODO: cron-specific overrides (DB, logging, limits, etc.)
 }
 

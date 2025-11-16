@@ -22,8 +22,8 @@ RewriteEngine On
 # HTTP to HTTPS (direct + reverse proxy)
 # Warning: must affect HTTP requests ONLY! (excl. ws, wss, etc.)
 RewriteCond %{HTTP_UPGRADE} !websocket [NC]
-RewriteCond %{HTTPS} off [OR]
-RewriteCond %{HTTP:X-Forwarded-Proto} =http
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 #
@@ -37,8 +37,8 @@ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 
 RewriteRule ^code/[^/]+/(_admin|_docs|_lang|_libs)(/.*)?$ / [L,R=301]
 
-RewriteRule ^favicon.ico(.*)$ - [L]
-RewriteRule ^robots.txt(.*)$ - [L]
+RewriteRule ^favicon\.ico$ - [L]
+RewriteRule ^robots\.txt$ - [L]
 RewriteRule ^code/.+/_cron(/.*)?$ - [L]
 RewriteRule ^code/.+/web(/.*)?$  - [L]
 RewriteRule ^(.*)$ index.php [L]

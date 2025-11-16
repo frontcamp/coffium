@@ -61,10 +61,10 @@ if (!defined('LOCAL_PATH_SIGN')) define('LOCAL_PATH_SIGN', 'server\domains\sperr
 $sign_path_normalized = norm_path(LOCAL_PATH_SIGN);
 $self_path_normalized = norm_path(__DIR__);
 
-define('IS_CRON', substr(PHP_SAPI, 0, 3) == 'cli' or !isset($_SERVER['HTTP_HOST']));
+define('IS_CRON', substr(PHP_SAPI, 0, 3) == 'cli' || !isset($_SERVER['HTTP_HOST']));
 define('IS_LOCAL', (false !== stripos($self_path_normalized, $sign_path_normalized)));
 define('IS_DEV', substr(($_SERVER['HTTP_HOST'] ?? ''), 0, 4) == 'dev.');
-define('IS_PROD', !(IS_LOCAL or IS_DEV));
+define('IS_PROD', !(IS_LOCAL || IS_DEV));
 
 $env = IS_LOCAL ? 'Local' : (IS_DEV ? 'Development' : 'Production');
 define('SERVER_TYPE', $env.(IS_CRON ? '-Cron' : ''));
@@ -122,7 +122,7 @@ ini_set('zlib.output_compression', 1);
 
 ini_set('session.use_strict_mode', 1);
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', !IS_LOCAL);
+ini_set('session.cookie_secure', IS_DEV || IS_PROD);
 
 define('PHP_SESSION_LIFETIME', 60 * 60 * 24 * 30);  # 1 month
 ini_set('session.auto_start', 0);
@@ -132,7 +132,7 @@ ini_set('session.use_cookies', 1);
 if (!IS_CRON)
 {
     session_name('SMSID');  # session cookie name
-    if(session_id() == '') session_start();
+    if (session_id() == '') session_start();
     #setcookie(session_name(), session_id(), time() + PHP_SESSION_LIFETIME, '/');
 }
 
@@ -187,10 +187,10 @@ mb_regex_encoding('UTF-8');
 
 /**
  * VIP (exclusive dev/management access)
- * enable via ?sperrmullkeeper=on|yes|1
+ * enable via ?projkeeper=on|yes|1
  */
 
-define('VIP_MODE_KEY', 'sperrmullkeeper');
+define('VIP_MODE_KEY', 'projkeeper');
 
 if (!isset($_SESSION['core.vip_access']))  // init
 {

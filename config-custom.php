@@ -2,7 +2,8 @@
 defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 
-/*******************************************************************************
+
+/**
  * Custom project settings
  */
 
