@@ -4,17 +4,21 @@ $GLOBALS['SYS']['included'][] = __FILE__;
 
 
 /*******************************************************************************
- * Code profiling API
+ * Profiling API
+ *
+ * core_timer() usage:
+ *   core_timer()            -> create a timer, return its ID
+ *   core_timer($id)         -> return delta between saved and current time
+ *   core_timer($id, $value) -> set timer value (timestamp or custom)
+ *
+ * Behaviour:
+ *   1) If a timer with $timer_id exists:
+ *      a) if $value is given, the timer value is updated
+ *      b) otherwise the function returns the time delta
+ *   2) If no timer with $timer_id exists, it will be created:
+ *      a) if $value is given, the timer is set to $value
+ *      b) otherwise the timer is set to the current time
  */
-
-# timer() - creates a timer, returns randomly generated timer ID
-# timer($timer_id, $value):
-#   1) if timer with $timer_id exists:
-#      a) if $value is given, then set $value to the timer
-#      b) else returns its delta (difference between saved and current time)
-#   2) if timer with $timer_id does not exists, it will be created:
-#      a) if $value given, new timer will be set to the $value
-#      b) else new timer will be set to a current time
 function core_timer($timer_id=NULL, $value=NULL)
 {
     static $_CORE_TIMERS = array();
@@ -37,7 +41,7 @@ function core_timer($timer_id=NULL, $value=NULL)
                 $_CORE_TIMERS[$timer_id] = $value;  # set
             }
         }
-        else  # ..if timer does not exists, creating a timer
+        else  # timer does not exist yet, create it
         {
             if (is_null($value)) {
                 $_CORE_TIMERS[$timer_id] = $current;  # now
@@ -140,7 +144,10 @@ function core_register_finalizer($func_name)
 #
 # Run finalization functions
 
-foreach($_FINALIZERS as $finalizer) $finalizer();
+foreach($_FINALIZERS as $finalizer)
+{
+    if (is_callable($finalizer)) $finalizer();
+}
 
 #
 # Run helpers (debug)
@@ -156,8 +163,8 @@ $dlt = number_format($prt - $pgt, 4);
 
 if (IS_VIP and isset($_REQUEST['verbose']))
 {
-    print("PHP process run time: <b>$prt sec</b>.; ");
-    print("page generation time: <b>$pgt sec</b>.; ");
+    print("PHP process run time: <b>$prt sec</b>; ");
+    print("page generation time: <b>$pgt sec</b>; ");
     print("PHP process overhead: <b>$dlt sec</b>.\n");
 }
 

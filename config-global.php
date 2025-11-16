@@ -55,7 +55,7 @@ function norm_path($path)
     return str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $path);
 }
 
-# IMPORTANT: change to detect local project right!
+# IMPORTANT: change to detect local project correctly!
 if (!defined('LOCAL_PATH_SIGN')) define('LOCAL_PATH_SIGN', 'server\domains\sperrmull');
 
 $sign_path_normalized = norm_path(LOCAL_PATH_SIGN);
@@ -63,13 +63,11 @@ $self_path_normalized = norm_path(__DIR__);
 
 define('IS_CRON', substr(PHP_SAPI, 0, 3) == 'cli' or !isset($_SERVER['HTTP_HOST']));
 define('IS_LOCAL', (false !== stripos($self_path_normalized, $sign_path_normalized)));
-define('IS_DEV', substr(($_SERVER['SERVER_NAME'] ?? ''), 0, 4) == 'dev.');
-define('IS_PROD', !(IS_LOCAL|IS_DEV));
+define('IS_DEV', substr(($_SERVER['HTTP_HOST'] ?? ''), 0, 4) == 'dev.');
+define('IS_PROD', !(IS_LOCAL or IS_DEV));
 
-define('SERVER_TYPE', (IS_LOCAL ? 'Local' : '')
-                     .(IS_DEV ? 'Development' : '')
-                     .(IS_PROD ? 'Production' : '')
-                     .(IS_CRON ? '-Cron' : ''));
+$env = IS_LOCAL ? 'Local' : (IS_DEV ? 'Development' : 'Production');
+define('SERVER_TYPE', $env.(IS_CRON ? '-Cron' : ''));
 
 
 /**
@@ -81,7 +79,9 @@ define('SERVER_TYPE', (IS_LOCAL ? 'Local' : '')
 define('TIME_HASH', IS_PROD ? date('YmdH') : date('YmdHis'));
 
 # Project root
-define('PROJ_ROOT', rtrim($_SERVER['DOCUMENT_ROOT'], '/\\'));
+$docroot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+if ($docroot === '') $docroot = dirname(__DIR__);
+define('PROJ_ROOT', rtrim($docroot, '/\\'));
 
 # Core (components location)
 define('CODE_PATH', '/code');
@@ -120,6 +120,10 @@ ini_set('zlib.output_compression', 1);
 
 # Session
 
+ini_set('session.use_strict_mode', 1);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', !IS_LOCAL);
+
 define('PHP_SESSION_LIFETIME', 60 * 60 * 24 * 30);  # 1 month
 ini_set('session.auto_start', 0);
 ini_set('session.cookie_lifetime', PHP_SESSION_LIFETIME);
@@ -146,16 +150,16 @@ $ERR_NAMES = array(
     E_USER_ERROR => 'User-generated error',            # 256
     E_USER_WARNING => 'User-generated warning',        # 512
     E_USER_NOTICE => 'User-generated notice',          # 1024
-    E_STRICT => 'Strict PHP suggest',                  # 2048
+    E_STRICT => 'Strict standards suggestion',         # 2048
     E_RECOVERABLE_ERROR => 'Catchable fatal error',    # 4096
-    E_DEPRECATED => 'Depricated warning',              # 8192
-    E_USER_DEPRECATED => 'User-generated deprecated',  # 16384
+    E_DEPRECATED => 'Deprecated warning',              # 8192
+    E_USER_DEPRECATED => 'User-generated deprecated notice', # 16384
 );
 
 ini_set('display_errors', IS_PROD ? 0 : 1);
 ini_set('display_startup_errors', IS_PROD ? 0 : 1);
 ini_set('error_log', LOGS_ROOT.'/error.log');
-ini_set('error_reporting', E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
+ini_set('error_reporting', E_ALL);
 ini_set('log_errors', 1);
 
 set_error_handler('error_handler');
@@ -163,7 +167,7 @@ function error_handler($err_no, $err_str, $err_file, $err_line)
 {
     global $ERR_NAMES;
     if (!(error_reporting() & $err_no)) return;
-    $err_name = isset($ERR_NAMES[$err_no]) ? $ERR_NAMES[$err_no] : 'Unknown Error!';
+    $err_name = $ERR_NAMES[$err_no] ?? 'Unknown error';
     $err_text = "$err_name: $err_str in $err_file on line $err_line";
     $err_html = "<b>$err_name</b>: $err_str in <b>$err_file</b> on line <b>$err_line</b><br>\n";
     if (ini_get('log_errors')) { error_log($err_text); }
@@ -182,7 +186,8 @@ mb_regex_encoding('UTF-8');
 
 
 /**
- * VIP (exclusive project dev/management team access)
+ * VIP (exclusive dev/management access)
+ * enable via ?sperrmullkeeper=on|yes|1
  */
 
 define('VIP_MODE_KEY', 'sperrmullkeeper');
@@ -195,7 +200,7 @@ if (!isset($_SESSION['core.vip_access']))  // init
 if (isset($_REQUEST[VIP_MODE_KEY]))  // override from request
 {
     $vip_mode_raw = strtolower($_REQUEST[VIP_MODE_KEY]);
-    $_SESSION['core.vip_access'] = in_array($vip_mode_raw, array(1, 'on', 'yes'));
+    $_SESSION['core.vip_access'] = in_array($vip_mode_raw, array(1, '1', 'on', 'yes', 'true'), true);
 }
 
 define('IS_VIP', $_SESSION['core.vip_access']);
