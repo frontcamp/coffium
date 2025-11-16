@@ -1,0 +1,165 @@
+<?php
+defined('INDEX') or die('Forbidden!');
+$GLOBALS['SYS']['included'][] = __FILE__;
+/* Common functionality */
+
+
+function bool_to_int($b) { return $b === true ? 1 : 0; }
+
+function bool_to_onoff($b) { return $b === true ? 'On' : 'Off'; }
+
+function bool_to_yesno($b) { return $b === true ? 'Yes' : 'No'; }
+
+
+function int_to_bool($i) { return $i >= 1 ? true : false; }
+
+
+function &empty_array() { $a = array(); return $a; }
+
+
+function file_get_data($file_path, $var_name='DATA')
+{
+    if (!file_exists($file_path))
+    {
+        trigger_error('Data file not exists: '.$file_path, E_USER_ERROR);
+        die();
+    }
+    include($file_path);
+    if (!isset($$var_name))
+    {
+        trigger_error('Data variable absent: '.$var_name, E_USER_ERROR);
+        die();
+    }
+    return $$var_name;
+}
+
+
+function file_put_data($file_path, $data, $var_name='DATA')
+{
+    $s = "<?php\n\n$".$var_name.' = '.var_export($data, true).";\n\n";
+    file_put_contents($file_path, $s);
+}
+
+
+function is_float_or_int($value) { return (is_float($value) or is_int($value)); }
+function is_int_or_float($value) { return (is_int($value) or is_float($value)); }
+
+function is_decimal($value) { return (false !== strpos($value, '.')); }
+
+
+/* Return true if the value is an integer or a string representing an integer, false otherwise */
+function is_int_adv($value)
+{
+    if (is_int($value)) return true;
+    if (!is_string($value)) return false;
+    return str_starts_with($value, '-') ? ctype_digit(substr($value, 1)) : ctype_digit($value);
+}
+
+
+/* Trim number to a specific range of values */
+function ntrim($value, $min, $max)
+{
+    if ($value < $min) $value = $min;
+    if ($value > $max) $value = $max;
+    return $value;
+}
+
+
+function redirect($location, $status = 302, $x_redirect_by=CORE_NAME)
+{
+    if (!is_int($status) or $status < 300 or $status > 399) {
+        trigger_error('HTTP redirect status code must be a redirection code, 3xx.', E_USER_ERROR);
+    } elseif (!headers_sent()) {  # HTTP redirection
+        if (is_string($x_redirect_by)) header('X-Redirect-By: '.$x_redirect_by);
+        header('Location: '.$location, true, $status);
+    } else {  # JS redirection
+        echo "<script type='text/JavaScript'>document.location.href='$location';</script>\n";
+    }
+    die('<a href="'.$location.'">Please click here if you are not redirected within a few seconds.</a>');
+}
+
+
+function reload()
+{
+    redirect('?');
+}
+
+
+function rmtree($path)
+{
+    if (!is_dir($path)) return;
+    $d = opendir($path);
+    while (false !== ($name = readdir($d)))
+    {
+        if (($name != '.') and ($name != '..'))
+        {
+            $p = $path.'/'.$name;
+            if (is_dir($p)) rmtree($p); else unlink($p);
+        }
+    }
+    closedir($d);
+    rmdir($path);
+}
+
+
+/**
+ * List files and directories inside the specified path
+ * This function:
+ * + removes "." and ".."
+ * + sort folders first
+ * + natsort folder and file names
+ */
+function scandir_advanced($path)
+{
+    $path = str_replace('\\', '/', $path);  # fix Windows dir separators
+    $path = rtrim($path, '/\\');            # remove ending slash
+
+    if (!is_dir($path)) trigger_error("Invalid path to scan! ($path)", E_USER_ERROR);
+
+    $files = scandir($path, SCANDIR_SORT_ASCENDING);
+
+    $just_folders = array();
+    $just_files = array();
+    foreach ($files as $fname)
+    {
+        if ($fname == '.' or $fname == '..') continue;
+        $abs_path = $path.'/'.$fname;
+        if (is_dir($abs_path)) array_push($just_folders, $fname);
+        if (is_file($abs_path)) array_push($just_files, $fname);
+    }
+    natsort($just_folders);
+    natsort($just_files);
+
+    return array_merge($just_folders, $just_files);
+}
+
+function get_client_ip()
+{
+    $ip = '';
+    if (isset($_SERVER['HTTP_CLIENT_IP'])
+    and filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP))
+    {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    }
+    elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+    {
+        // split addresses and get 1st
+        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        foreach ($ips as $ip_address)
+        {
+            $ip_address = trim($ip_address); // remove spaces
+            if (filter_var($ip_address, FILTER_VALIDATE_IP))
+            {
+                $ip = $ip_address;
+                break;
+            }
+        }
+    }
+    elseif (isset($_SERVER['REMOTE_ADDR'])
+       and filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP))
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+}
+

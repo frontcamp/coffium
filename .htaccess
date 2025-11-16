@@ -1,0 +1,49 @@
+#
+# Ensures that PHP magic_quotes is Off
+php_flag magic_quotes_gpc Off
+
+#
+# Encoding
+AddDefaultCharset utf-8
+
+#
+# Disable directory browsing
+
+Options All -Indexes
+
+#
+# Add ICO mime type
+
+AddType image/x-icon .ico
+AddType image/svg+xml svg
+
+#
+# Redirections
+
+RewriteEngine On
+
+#
+# HTTP to HTTPS
+# Warning: should affect HTTP protocol ONLY! (excl.: ws, wss, etc)
+#RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} =http
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+#
+# Remove "www" from host
+
+RewriteCond %{HTTP_HOST} ^www\.(.+)
+RewriteCond %{HTTPS}s/%1 ^(on(s)|offs)/(.+)
+RewriteRule ^ http%2://%3%{REQUEST_URI} [L,R=301]
+
+#
+# Core
+
+RewriteRule ^favicon.ico(.*)$ - [L]
+RewriteRule ^code(.*)/_cron(.*)$ - [L]
+RewriteRule ^code(.*)/web(.*)$ - [L]
+RewriteRule ^data/uploads(.*)$ - [L]
+RewriteRule ^test(.*)$ - [L]
+RewriteRule ^(.*)(_admin|_docs|_lang|_libs)(.*)$ / [L,R=301]
+RewriteRule ^(.*)$ index.php [L]
+

@@ -1,0 +1,170 @@
+<?php
+define('INDEX', true);
+$GLOBALS['SYS']['included'][] = __FILE__;
+
+
+/*******************************************************************************
+ * Code profiling API
+ */
+
+# timer() - creates a timer, returns randomly generated timer ID
+# timer($timer_id, $value):
+#   1) if timer with $timer_id exists:
+#      a) if $value is given, then set $value to the timer
+#      b) else returns its delta (difference between saved and current time)
+#   2) if timer with $timer_id does not exists, it will be created:
+#      a) if $value given, new timer will be set to the $value
+#      b) else new timer will be set to a current time
+function core_timer($timer_id=NULL, $value=NULL)
+{
+    static $_CORE_TIMERS = array();
+
+    $current = microtime(true);
+
+    if (is_null($timer_id))  # create new timer
+    {
+        $timer_id = uniqid('timer_', true);
+        $_CORE_TIMERS[$timer_id] = $current;
+        return $timer_id;
+    }
+    else  # $timer_id given
+    {
+        if (array_key_exists($timer_id, $_CORE_TIMERS))  # ..if timer exists
+        {
+            if (is_null($value)) {
+                return number_format($current - $_CORE_TIMERS[$timer_id], 4);  # return delta
+            } else {
+                $_CORE_TIMERS[$timer_id] = $value;  # set
+            }
+        }
+        else  # ..if timer does not exists, creating a timer
+        {
+            if (is_null($value)) {
+                $_CORE_TIMERS[$timer_id] = $current;  # now
+            } else {
+                $_CORE_TIMERS[$timer_id] = $value;    # set
+            }
+        }
+    }
+}
+
+core_timer('PROC_RUN_TIMER', $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+core_timer('PAGE_GEN_TIMER');
+
+
+/*******************************************************************************
+ * Initialization
+ */
+
+$_FINALIZERS = array();
+
+#
+# configuration
+
+require('config-global.php');
+require('config-server.php');
+require('config-custom.php');
+
+#
+# debug
+
+if (IS_VIP) require('libs/inc.dump.php');
+
+#
+# core libs
+
+require('libs/inc.common.php');
+require('libs/inc.registry.php');
+require('libs/inc.request.php');
+require('libs/inc.response.php');
+
+
+/*******************************************************************************
+ * Emergency Triggers
+ */
+
+# Lock/unlock API
+
+function core_lock() { @unlink(ET_FLAG_FILE); }
+function core_locked() { return !is_file(ET_FLAG_FILE); }
+function core_unlock() { file_put_contents(ET_FLAG_FILE, ''); }
+
+#
+# Handle locked core (applies only to non VIP users!)
+
+if (core_locked() and !IS_VIP) die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
+
+#
+# Maintenance schedule (PROD only!)
+
+if (defined('ET_SYSMNT_FROM_HR') and defined('ET_SYSMNT_TO_HR') and IS_PROD)
+{
+    $ET_FROM = new DateTime();
+    $ET_FROM->setTime(ET_SYSMNT_FROM_HR, 0);
+    $ET_TO = new DateTime();
+    $ET_TO->setTime(ET_SYSMNT_TO_HR, 0);
+    $ET_NOW = new DateTime();
+    if ($ET_FROM <= $ET_NOW and $ET_NOW <= $ET_TO and !IS_VIP) {
+        die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
+    }
+}
+
+#
+# Check CORE integrity & readiness
+
+$is_ready = file_exists(ET_FLAG_FILE);
+$is_code = is_dir(CODE_ROOT);
+if ((!$is_ready or !$is_code) and !(IS_VIP and $is_code))
+{
+    die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
+}
+
+
+/*******************************************************************************
+ * Find handler, generate response
+ */
+
+core_use_handler(sys_get('route.path'));
+
+
+/*******************************************************************************
+ * Finalization
+ */
+
+function core_register_finalizer($func_name)
+{
+    global $_FINALIZERS;
+    array_push($_FINALIZERS, $func_name);
+}
+
+#
+# Run finalization functions
+
+foreach($_FINALIZERS as $finalizer) $finalizer();
+
+#
+# Run helpers (debug)
+
+if (IS_VIP) require('libs/inc.helpers.php');
+
+#
+# Output timings
+
+$prt = core_timer('PROC_RUN_TIMER');
+$pgt = core_timer('PAGE_GEN_TIMER');
+$dlt = number_format($prt - $pgt, 4);
+
+if (IS_VIP and isset($_REQUEST['verbose']))
+{
+    print("PHP process run time: <b>$prt sec</b>.; ");
+    print("page generation time: <b>$pgt sec</b>.; ");
+    print("PHP process overhead: <b>$dlt sec</b>.\n");
+}
+
+if(IS_VIP and isset($_REQUEST['profiling']))
+{
+    dump_js_log('PHP process run time: '.$prt.' sec.');
+    dump_js_log('Page generation time: '.$pgt.' sec.');
+    dump_js_log('PHP process overhead: '.$dlt.' sec.');
+}
+
