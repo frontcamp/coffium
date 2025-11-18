@@ -56,7 +56,7 @@ function norm_path($path)
 }
 
 # IMPORTANT: change to detect local project correctly!
-if (!defined('LOCAL_PATH_SIGN')) define('LOCAL_PATH_SIGN', 'server\domains\sperrmull');
+if (!defined('LOCAL_PATH_SIGN')) define('LOCAL_PATH_SIGN', 'server\domains\coffium');
 
 $sign_path_normalized = norm_path(LOCAL_PATH_SIGN);
 $self_path_normalized = norm_path(__DIR__);
@@ -83,9 +83,9 @@ $docroot = $_SERVER['DOCUMENT_ROOT'] ?? '';
 if ($docroot === '') $docroot = __DIR__;
 define('PROJ_ROOT', rtrim($docroot, '/\\'));
 
-# Core (components location)
-define('CODE_PATH', '/code');
-define('CODE_ROOT', PROJ_ROOT.CODE_PATH);
+# Components
+define('COMS_PATH', '/coms');
+define('COMS_ROOT', PROJ_ROOT.COMS_PATH);
 
 # Data
 define('DATA_PATH', '/data');

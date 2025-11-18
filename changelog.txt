@@ -6,6 +6,10 @@ TODO:
   some global route flag by using some core functions: core_terminate_route(), etc
 > покрыть тестами библиотеку /libs/inc.common.php т.к. там важный глобальный функционал
 
+[0.4.20251118-0950]
+* components folder renamed from /code to /coms
+* many issues were found and fixed using the GPT chat :)
+
 [0.4.20240728-0505]
 + Added $CONTEXT['CORE_ENABLE_BUFFER'] enable output buffering during handler process
 + Added $CONTEXT['CORE_RETURN_OUTPUT'] force output buffer return

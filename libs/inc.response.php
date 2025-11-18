@@ -44,7 +44,7 @@ $_H_PRELOAD_JS_INIT_POS = 0;   # hdl.preload.js initial sub-stack last position
 #
 # Route ROOT API
 
-$_ROUTE_ROOT = CODE_ROOT;
+$_ROUTE_ROOT = COMS_ROOT;
 $_ROUTE_ROOT_STACK = array();
 
 function restore_route_root()
@@ -273,11 +273,11 @@ function core_use_handler(string $path,
 
             $css_path = route_mk_path($_ROUTE_ROOT, route_std_path($path.'/web/s'), $_name, '', 'css');
             $css_url_path = route_mk_path('', route_std_path($path.'/web/s'), $_name, '', 'css');
-            $css_url_root = sys_opt_get('request', 'root').CODE_PATH.$css_url_path;
+            $css_url_root = sys_opt_get('request', 'root').COMS_PATH.$css_url_path;
 
             $js_path = route_mk_path($_ROUTE_ROOT, route_std_path($path.'/web/s'), $_name, '', 'js');
             $js_url_path = route_mk_path('', route_std_path($path.'/web/s'), $_name, '', 'js');
-            $js_url_root = sys_opt_get('request', 'root').CODE_PATH.$js_url_path;
+            $js_url_root = sys_opt_get('request', 'root').COMS_PATH.$js_url_path;
 
             if ($flags & HDL_ACT and is_file($act_path)) $handler_found |= HDL_ACT;
             if ($flags & HDL_TPL and is_file($tpl_path)) $handler_found |= HDL_TPL;
@@ -409,7 +409,7 @@ function static_url($dir=NULL)
  */
 function static_url_path($tpl_path=NULL)
 {
-    if (is_null($tpl_path)) $tpl_path = CODE_ROOT;
+    if (is_null($tpl_path)) $tpl_path = COMS_ROOT;
     $tpl_path = str_replace('\\', '/', $tpl_path);
 
     $path = str_replace(PROJ_ROOT, '', $tpl_path);

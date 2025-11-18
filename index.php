@@ -116,9 +116,9 @@ if (defined('ET_SYSMNT_FROM_HR') && defined('ET_SYSMNT_TO_HR') && IS_PROD)
 #
 # Check CORE integrity & readiness
 
-$is_ready = file_exists(ET_FLAG_FILE);
-$is_code = is_dir(CODE_ROOT);
-if ((!$is_ready || !$is_code) && !(IS_VIP && $is_code))
+$is_ready = is_file(ET_FLAG_FILE);
+$is_coms = is_dir(COMS_ROOT);
+if ((!$is_ready || !$is_coms) && !(IS_VIP && $is_coms))
 {
     die(ET_HEADER.ET_SYSMNT.ET_FOOTER);
 }

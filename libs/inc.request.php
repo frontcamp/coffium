@@ -52,11 +52,11 @@ sys_opt('request', 'path', rtrim(strtok($uri, '?'), '/\\'));
 sys_opt('request', 'orig', $root.sys_opt('request', 'uri'));
 sys_opt('request', 'base', $root.sys_opt('request', 'path'));
 
-# Core
-sys('route.path_raw', code_path_cleanse(sys_opt('request', 'path')));  # original route path
-sys('route.path', sys('route.path_raw'));
-sys('route.chunks_raw', code_path_parse(sys('route.path')));  # original route chunks
-sys('route.chunks', sys('route.chunks_raw'));
+# Route
+sys('route.path_raw', route_path_cleanse(sys_opt('request', 'path'))); # original route path
+sys('route.path', sys('route.path_raw'));                              # working route path
+sys('route.chunks_raw', route_path_parse(sys('route.path')));          # original route chunks
+sys('route.chunks', sys('route.chunks_raw'));                          # working route chunks
 
 # Multilingual URL support
 if (ML_URL_SUPPORT)
@@ -66,14 +66,14 @@ if (ML_URL_SUPPORT)
     {
         unset($chunks[0]);                # remove 1st chunk
         $chunks = array_values($chunks);  # reindex
-        $path = code_path_cleanse(implode('/', $chunks));
+        $path = route_path_cleanse(implode('/', $chunks));
         sys('route.path', $path);         # update string value
         sys('route.chunks', $chunks);     # update array value
     }
 }
 
 
-function code_path_cleanse(string $url_path,
+function route_path_cleanse(string $url_path,
                            bool $auto_add_leading_slash=true,
                            bool $empty_path_slashed=false,
                            bool $add_ending_slash=false)
@@ -110,7 +110,7 @@ function code_path_cleanse(string $url_path,
 
 
 # Parse incoming request into chunks
-function code_path_parse(string $url_clean_path)
+function route_path_parse(string $url_clean_path)
 {
     $chunks = explode('/', $url_clean_path);
     $chunks = array_filter($chunks, static function ($v) {
