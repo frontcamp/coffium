@@ -51,12 +51,3 @@ if (isset($_REQUEST['dump-variables'])
 
 if (isset($_REQUEST['phpinfo'])) phpinfo();
 
-#
-# Unit tests
-
-if (isset($_REQUEST['core-test']))
-{
-    require_once('inc.test.php');
-    launch_tests(PROJ_ROOT.'/libs/tests/');
-}
-

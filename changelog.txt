@@ -4,11 +4,12 @@ Legend: > item; # note; + added; * changed; ~ outdated; - deleted; ! not done.
 TODO:
 > think about route termination from included scripts (init, handlers), e.g. disable
   some global route flag by using some core functions: core_terminate_route(), etc
-> покрыть тестами библиотеку /libs/inc.common.php т.к. там важный глобальный функционал
+> decide where and how to test core functionality
 
 [0.4.20251118-0950]
 * components folder renamed from /code to /coms
 * many issues were found and fixed using the GPT chat :)
+- deleted extra core functionality (timers, emergency triggers, tests, etc)
 
 [0.4.20240728-0505]
 + Added $CONTEXT['CORE_ENABLE_BUFFER'] enable output buffering during handler process
