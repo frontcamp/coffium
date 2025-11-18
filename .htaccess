@@ -35,11 +35,8 @@ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 #
 # Core
 
-RewriteRule ^coms/[^/]+/(_admin|_docs|_lang|_libs)(/.*)?$ / [L,R=301]
-
 RewriteRule ^favicon\.ico$ - [L]
 RewriteRule ^robots\.txt$ - [L]
-RewriteRule ^coms/.+/_cron(/.*)?$ - [L]
 RewriteRule ^coms/.+/web(/.*)?$  - [L]
 RewriteRule ^(.*)$ index.php [L]
 

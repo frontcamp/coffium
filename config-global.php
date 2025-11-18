@@ -27,26 +27,6 @@ define('ML_DIR_SUPPORT', true);   # auto load /d1/d2/_lang/<name>.php files
 
 
 /**
- * EMERGENCY TRIGGERS
- */
-
-define('ET_FLAG_FILE', '-ready');
-
-# Maintenance schedule (comment to disable)
-
-define('ET_SYSMNT_FROM_HR', 2);   # 24hr time format w/o leading zeros
-define('ET_SYSMNT_TO_HR', 3);     # 24hr time format w/o leading zeros
-
-# Trigger messages
-
-define('ET_HEADER', '<!DOCTYPE html><html lang="en"><body><center style="color:#bbb;font-size:10vw;">');
-define('ET_FOOTER', '</center></body></html>');
-
-define('ET_ATTACK', 'We are under attack! Please visit us later&hellip;');
-define('ET_SYSMNT', 'System maintenance. Will be back shortly&hellip;');
-
-
-/**
  * SERVER TYPE
  */
 
@@ -79,9 +59,7 @@ define('SERVER_TYPE', $env.(IS_CRON ? '-Cron' : ''));
 define('TIME_HASH', IS_PROD ? date('YmdH') : date('YmdHis'));
 
 # Project root
-$docroot = $_SERVER['DOCUMENT_ROOT'] ?? '';
-if ($docroot === '') $docroot = __DIR__;
-define('PROJ_ROOT', rtrim($docroot, '/\\'));
+define('PROJ_ROOT', rtrim(__DIR__, '/\\'));
 
 # Components
 define('COMS_PATH', '/coms');
@@ -187,7 +165,7 @@ mb_regex_encoding('UTF-8');
 
 
 /**
- * VIP (exclusive dev/management access)
+ * VIP (exclusive dev/test/admin/edit access)
  * enable via ?projkeeper=on|yes|1
  */
 
