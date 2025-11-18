@@ -7,9 +7,9 @@ TODO:
 > decide where and how to test core functionality
 
 [0.4.20251118-0950]
-* components folder renamed from /code to /coms
-* many issues were found and fixed using the GPT chat :)
-- deleted extra core functionality (timers, emergency triggers, tests, etc)
+* Components folder renamed from /code to /coms
+* Many issues were found and fixed using the GPT chat :)
+- Deleted extra core functionality (timers, emergency triggers, tests, etc)
 
 [0.4.20240728-0505]
 + Added $CONTEXT['CORE_ENABLE_BUFFER'] enable output buffering during handler process
@@ -45,7 +45,7 @@ TODO:
 * CORE_PATH/CORE_ROOT constants renamed to CODE_PATH/CODE_ROOT
 
 [0.3.20220712-2350]
-+ added common functions: is_int_or_float and is_float_or_int (synonims)
++ added common functions: is_int_or_float and is_float_or_int (synonyms)
 
 [0.3.20220625-11:11]
 * Fixed debug function dump_js_log, now it works correct and with multiple arguments
@@ -72,7 +72,7 @@ TODO:
 [0.3.20211229-0916]
 + /libs/inc.helpers.php - added '?hash=some' to show password_hash('some', PASSWORD_BCRYPT)
 + Added .gitkeep files to force GIT track empty folders
-* Fixed component requirements loading algorythm
+* Fixed component requirements loading algorithm
 * Registry 'hdl.preload.css|js' values changed from rel paths to absolute URL roots
 * Changed static files loading order (now they assinged after use_api, but before handler)
 * Launch ACT and TPL files in a single namespace with an access to single $CONTEXT
