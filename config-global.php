@@ -17,7 +17,7 @@ if (version_compare(PHP_VERSION, '8.3.0', '<'))
 
 define('FRAMEWORK', 'Coffium');
 define('CORE_NAME', 'White Tiger');
-define('CORE_VERSION', '0.4');
+define('CORE_VERSION', '0.5');
 
 #
 # Project
