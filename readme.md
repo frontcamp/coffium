@@ -32,33 +32,33 @@ Coffium
 Возможности из коробки
 ----------------------
 
-+ - готово
-* - в разработке
-
 + компонентное ядро с документацией (/docs/core.txt)
-* автозапуск или глобальный инициализатор (/coms/__init__.php)
-* обработчик по умолчанию (/coms/act|tpl.default.php)
-* статика (служебные страницы: Error 404, etc., /coms/static)
-* административный интерфейс (/coms/admin)
-* отладчик (/coms/debug)
-* ZHTML CSS framework (/coms/common/frontcamp/zhtml)
-* jQuery JavaScript library (/coms/common/openjsf/jquery)
-* GeoIP база с демонстрацией (/coms/common/maxmind/geoip2)
-* драйвер БД MySQL (/coms/db/*)
-* менеджер таблиц БД (аналог phpMyAdmin, /coms/dbtm)
-* статистика (/coms/stats)
-* файловый кеш (/coms/cache)
-* блокировщик подозрительной активности (/coms/blocker)
-* пользователи (регистрация, вход, выход, профиль, восстановление пароля, /coms/user)
-* компонент шаблонов разметки (/coms/layout)
-* статические страницы (/coms/pages)
-* комментирование (/coms/comments/)
-* почтовые рассылки (/coms/mailer)
-* личный блог (/coms/blog)
 
-* демо работы ядра (/coms/demo/core)
-* демо использования разметки (/coms/demo/layout)
-* демо статической, динамической и AJAX-компоновки страниц (/coms/demo/handling)
+В разработке:
+
+- автозапуск или глобальный инициализатор (/coms/__init__.php)
+- обработчик по умолчанию (/coms/act|tpl.default.php)
+- статика (служебные страницы: Error 404, etc., /coms/static)
+- административный интерфейс (/coms/admin)
+- отладчик (/coms/debug)
+- ZHTML CSS framework (/coms/common/frontcamp/zhtml)
+- jQuery JavaScript library (/coms/common/openjsf/jquery)
+- GeoIP база с демонстрацией (/coms/common/maxmind/geoip2)
+- драйвер БД MySQL (/coms/db/*)
+- менеджер таблиц БД (аналог phpMyAdmin, /coms/dbtm)
+- статистика (/coms/stats)
+- файловый кеш (/coms/cache)
+- блокировщик подозрительной активности (/coms/blocker)
+- пользователи (регистрация, вход, выход, профиль, восстановление пароля, /coms/user)
+- компонент шаблонов разметки (/coms/layout)
+- статические страницы (/coms/pages)
+- комментирование (/coms/comments/)
+- почтовые рассылки (/coms/mailer)
+- личный блог (/coms/blog)
+
+- демо работы ядра (/coms/demo/core)
+- демо использования разметки (/coms/demo/layout)
+- демо статической, динамической и AJAX-компоновки страниц (/coms/demo/handling)
 
 
 Для кого Coffium
