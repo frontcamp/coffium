@@ -1,13 +1,7 @@
 [![Coffium – The Only Real PHP Framework](docs/files/banner.png)](https://github.com/frontcamp/coffium)
 
-Coffium
-=======
-
-Version: 0.5.alpha
-
-PHP version: 8.3+
-
-License: PNND
+Coffium (0.5.alpha)
+===================
 
 Процедурный минималистичный файлово-ориентированный PHP-фреймворк для проектов с повышенными требованиями к производительности и безопасности.
 
