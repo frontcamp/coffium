@@ -6,10 +6,12 @@ TODO:
   some global route flag by using some core functions: core_terminate_route(), etc
 > decide where and how to test core functionality
 
-[0.4.20251118-0950]
+[0.5.20251118-0950]
+# 1st public GitHub version!
+# I decided to go with a minimalistic, lightweight core, without any unnecessary stuff, and everything else will go into components, including the status and diagnostics of the core itself.
 * Components folder renamed from /code to /coms
-* Many issues were found and fixed using the GPT chat :)
-- Deleted extra core functionality (timers, emergency triggers, tests, etc)
+* Many issues were found and fixed using the ChatGPT :)
+- Deleted extra (legacy) core functionality (timers, emergency triggers, tests, etc).
 
 [0.4.20240728-0505]
 + Added $CONTEXT['CORE_ENABLE_BUFFER'] enable output buffering during handler process
