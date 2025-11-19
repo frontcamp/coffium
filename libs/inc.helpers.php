@@ -48,6 +48,89 @@ if (isset($_REQUEST['dump-sys'])
  or isset($_REQUEST['dump-system'])) ndump('$SYS', $SYS);
 if (isset($_REQUEST['dump-variables'])
  or isset($_REQUEST['dump-vars'])) ndump('VARIABLES', get_defined_vars());
+if (isset($_REQUEST['dump-finalizers']))
+{
+    # WARNING: finalizers snapshot is captured before execution,
+    # so finalizers registered during finalization are not included
+
+    global $_FINALIZERS_SNAPSHOT;
+
+    $dump = array();
+
+    if (!empty($_FINALIZERS_SNAPSHOT))
+    {
+        ksort($_FINALIZERS_SNAPSHOT);
+        foreach ($_FINALIZERS_SNAPSHOT as $priority => $list)
+        {
+            foreach ($list as $callback)
+            {
+                $callable = '(unknown callable)';
+                $file     = null;
+                $line     = null;
+                $ref      = null;
+
+                if (is_string($callback))
+                {
+                    if (strpos($callback, '::') !== false)
+                    {
+                        list($class, $method) = explode('::', $callback, 2);
+                        $callable = $class.'::'.$method;
+
+                        if (class_exists($class) && method_exists($class, $method))
+                        {
+                            try { $ref = new ReflectionMethod($class, $method); } catch (ReflectionException $e) {}
+                        }
+                    }
+                    else
+                    {
+                        $callable = $callback;
+
+                        if (function_exists($callback))
+                        {
+                            try { $ref = new ReflectionFunction($callback); } catch (ReflectionException $e) {}
+                        }
+                    }
+                }
+                elseif ($callback instanceof Closure)
+                {
+                    $callable = 'closure';
+                    try { $ref = new ReflectionFunction($callback); } catch (ReflectionException $e) {}
+                }
+                elseif (is_array($callback) && count($callback) === 2)
+                {
+                    $objectOrClass = $callback[0];
+                    $method        = $callback[1];
+
+                    $callable = (is_object($objectOrClass)
+                        ? get_class($objectOrClass)
+                        : $objectOrClass).'::'.$method;
+
+                    try { $ref = new ReflectionMethod($objectOrClass, $method); } catch (ReflectionException $e) {}
+                }
+
+                if ($ref)
+                {
+                    $file = $ref->getFileName();
+                    $line = $ref->getStartLine();
+                }
+
+                $s = $callable;
+                if ($callable !== '(unknown callable)') {
+                    $s .= '()';
+                }
+                if ($file !== null)
+                {
+                    $s .= ' in '.$file;
+                    if ($line) $s .= ':'.$line;
+                }
+
+                $dump[$priority][] = $s;
+            }
+        }
+    }
+
+    ndump('FINALIZERS', $dump);
+}
 
 if (isset($_REQUEST['phpinfo'])) phpinfo();
 
