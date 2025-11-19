@@ -1,0 +1,9 @@
+
+Slogans
+=======
+
+The Only Real PHP Framework
+Your Last PHP Framework
+Always Awake PHP Framework
+Nuke-Proof PHP Framework
+
