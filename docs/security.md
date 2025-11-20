@@ -1,1 +1,1 @@
-#security.txt
+#security.md
