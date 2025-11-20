@@ -1,99 +1,101 @@
 
-Legend: > item; # note; + added; * changed; ~ outdated; - deleted; ! not done.
+TODO
+====
 
-TODO:
-> think about route termination from included scripts (init, handlers), e.g. disable
-  some global route flag by using some core functions: core_terminate_route(), etc
-> decide where and how to test core functionality
+- think about route termination from included scripts (init, handlers), e.g. disable some global route flag by using some core functions: core_terminate_route(), etc
+- decide where and how to test core functionality
 
-[0.5.20251118-0950]
-# 1st public GitHub version!
-# I decided to go with a minimalistic, lightweight core, without any unnecessary stuff, and everything else will go into components, including the status and diagnostics of the core itself.
-* Components folder renamed from /code to /coms
-* Many issues were found and fixed using the ChatGPT :)
+History
+=======
+
+## 0.5.20251118-0950
+; 1st public GitHub version!
+; I decided to go with a minimalistic, lightweight core, without any unnecessary stuff, and everything else will go into components, including the status and diagnostics of the core itself.
++ Components folder renamed from /code to /coms
++ Many issues were found and fixed using the ChatGPT :)
 - Deleted extra (legacy) core functionality (timers, emergency triggers, tests, etc).
 
-[0.4.20240728-0505]
+## 0.4.20240728-0505
 + Added $CONTEXT['CORE_ENABLE_BUFFER'] enable output buffering during handler process
 + Added $CONTEXT['CORE_RETURN_OUTPUT'] force output buffer return
 
-[0.4.20240726-1549]
+## 0.4.20240726-1549
 + Added $CONTEXT['CORE_EXTRACT_VARS'] option which trigger automatically variables
   extraction into namespace of action and template files
 
-[0.4.20240701-2036]
-* Changed a lot in /libs/inc.request.php
+## 0.4.20240701-2036
++ Changed a lot in /libs/inc.request.php
   Adopting to URL-based multilanguage support, fixed & expanded functionality
 
-[0.3.20230205-0350]
+## 0.3.20230205-0350
 + added alias '?dump-system' to /libs/inc.helpers.php
 + added more trace info to $SYS to /libs/inc.response.php
 
-[0.3.20220912-0010]
+## 0.3.20220912-0010
 + Added sys_opt_insert() functions and according unit tests
 + Added HDL_INIT handler flag and according functionality
 
-[0.3.20220902-1858]
+## 0.3.20220902-1858
 + Added int_to_bool() and bool_to_int() functions
 
-[0.3.20220815-1324]
+## 0.3.20220815-1324
 + Added handler_route_path_to_url() function to get endpoint URL by given handler route path
 
-[0.3.20220730-2325]
+## 0.3.20220730-2325
 + Added static_url_path() and static_url_root() functions to simply reach static files
 
-[0.3.20220724-2129]
-* folder /core/ renamed to /code/ because it is not a core, it is components codebase
-* CORE_PATH/CORE_ROOT constants renamed to CODE_PATH/CODE_ROOT
+## 0.3.20220724-2129
++ folder /core/ renamed to /code/ because it is not a core, it is components codebase
++ CORE_PATH/CORE_ROOT constants renamed to CODE_PATH/CODE_ROOT
 
-[0.3.20220712-2350]
+## 0.3.20220712-2350
 + added common functions: is_int_or_float and is_float_or_int (synonyms)
 
-[0.3.20220625-11:11]
-* Fixed debug function dump_js_log, now it works correct and with multiple arguments
+## 0.3.20220625-11:11
++ Fixed debug function dump_js_log, now it works correct and with multiple arguments
 
-[0.3.20220623-1530]
+## 0.3.20220623-1530
 + added common function: reload
 
-[0.3.20220622-1430]
+## 0.3.20220622-1430
 + added common functions: file_get_data, file_put_data, ntrim
 
-[0.3.20220206-0800]
-* Fixed critical issue (response lib unit test deleted /test/ folder)
+## 0.3.20220206-0800
++ Fixed critical issue (response lib unit test deleted /test/ folder)
 
-[0.3.20220108-0123]
+## 0.3.20220108-0123
 + Added IS_AJAX flag to /libs/inc.request.php
 + Added ?dump-headers URL helper
 
-[0.3.20220105-1745]
+## 0.3.20220105-1745
 + Added SERVER_TYPE constant to configuration
 
-[0.3.20220101-1830]
-* All is_readable() changed to is_file() to be sensitive to folders
+## 0.3.20220101-1830
++ All is_readable() changed to is_file() to be sensitive to folders
 
-[0.3.20211229-0916]
+## 0.3.20211229-0916
 + /libs/inc.helpers.php - added '?hash=some' to show password_hash('some', PASSWORD_BCRYPT)
 + Added .gitkeep files to force GIT track empty folders
-* Fixed component requirements loading algorithm
-* Registry 'hdl.preload.css|js' values changed from rel paths to absolute URL roots
-* Changed static files loading order (now they assinged after use_api, but before handler)
-* Launch ACT and TPL files in a single namespace with an access to single $CONTEXT
++ Fixed component requirements loading algorithm
++ Registry 'hdl.preload.css|js' values changed from rel paths to absolute URL roots
++ Changed static files loading order (now they assinged after use_api, but before handler)
++ Launch ACT and TPL files in a single namespace with an access to single $CONTEXT
 
-[0.3.20211228-2010]
-* New key name for $_SESSION['core.vip_access'] instead of 'exclusive_access'
-* Trim tailing '/' in registry keys: 'request.path', 'request.base'
+## 0.3.20211228-2010
++ New key name for $_SESSION['core.vip_access'] instead of 'exclusive_access'
++ Trim tailing '/' in registry keys: 'request.path', 'request.base'
 - Removed all direct access protection lines from /core/*.php files
 
-[0.3.20211228-0138]
+## 0.3.20211228-0138
 + /index.php - Added core_register_finalizer() function
 + /libs/inc.dump.php - Added function _formatted_backtrace($backtrace) to unify backtrace output in dump functions
 
-[0.3.20211225-2241]
-# First working, tested and documented version! Woo-hoo!
+## 0.3.20211225-2241
+; First working, tested and documented version! Woo-hoo!
 + Initial codebase
-  > configuration
-  > core
-  > libraries
-  > tests
+  + configuration
+  + core
+  + libraries
+  + tests
 + Initial documentation
 
