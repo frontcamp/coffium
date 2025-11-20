@@ -32,6 +32,7 @@ Coffium 0.5.alpha (в разработке)
 - автозапуск или глобальный инициализатор ```(/coms/__init__.php)```
 - обработчик по умолчанию ```(/coms/act|tpl.default.php)```
 - статика (служебные страницы: Error 404, etc., ```/coms/static```)
+- мультиязычность ```(/coms/mlang)```
 - административный интерфейс ```(/coms/admin)```
 - отладчик ```(/coms/debug)```
 - ZHTML CSS framework ```(/coms/common/frontcamp/zhtml)```
