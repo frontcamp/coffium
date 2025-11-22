@@ -2,25 +2,13 @@
 defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 
-if (version_compare(PHP_VERSION, '8.3.0', '<'))
-{
-    die('Required PHP version 8.3.0 or higher! Current: '.PHP_VERSION);
-}
-
 
 /**
- * SYSTEM INFO
+ * SYSTEM
  */
 
 #
-# Core
-
-define('FRAMEWORK', 'Coffium');
-define('CORE_NAME', 'White Tiger');
-define('CORE_VERSION', '0.5');
-
-#
-# Project
+# Multilanguage
 
 define('ML_URL_SUPPORT', false);  # skip 1st request part, like: domain/en-us/..
 define('ML_DIR_SUPPORT', true);   # auto load /d1/d2/_lang/<name>.php files
@@ -48,13 +36,20 @@ define('IS_DEV', str_starts_with($host, 'dev.')
 
 define('IS_PROD', !IS_LOCAL && !IS_DEV);
 
+$env_name = match (true) {
+    IS_LOCAL => 'Local',      IS_DEV   => 'Development',
+    IS_PROD  => 'Production', default  => 'Unknown',
+};
+
+# humanized string
+define('SERVER_TYPE', $env_name.(IS_CRON ? '-Cron' : ''));
 
 /**
- * SYSTEM PATHS
+ * SYSTEM PATHS & URLs
  */
 
-# Time-based hash for static URLs (use to force browser cache reset)
-# on DEV server - each second; on PROD server - hourly
+# Time-based hash
+# Hint: use it in URLs (to force browser cache reset)
 define('TIME_HASH', IS_PROD ? date('YmdH') : date('YmdHis'));
 
 # Project root
@@ -63,10 +58,6 @@ define('PROJ_ROOT', rtrim(__DIR__, '/\\'));
 # Components
 define('COMS_PATH', '/coms');
 define('COMS_ROOT', PROJ_ROOT.COMS_PATH);
-
-# Data
-define('DATA_PATH', '/data');
-define('DATA_ROOT', PROJ_ROOT.DATA_PATH);
 
 # Logs
 define('LOGS_PATH', '/logs');

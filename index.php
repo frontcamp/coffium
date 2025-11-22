@@ -3,6 +3,18 @@ define('INDEX', true);
 $GLOBALS['SYS']['included'][] = __FILE__;
 $GLOBALS['SYS']['runtime'] = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 
+# check PHP version
+if (version_compare(PHP_VERSION, '8.3.0', '<'))
+{
+    die('Required PHP version 8.3.0 or higher! Current: '.PHP_VERSION);
+}
+
+# core ID
+define('FRAMEWORK', 'Coffium');
+define('CORE_NAME', 'White Tiger');
+define('CORE_VERSION', '0.5');
+
+# finalizer priorities
 define('FIN_PRIO_LOW',     -5);  # data processing, pre-finalization
 define('FIN_PRIO_NORMAL',   0);  # routine finalizations, by default
 define('FIN_PRIO_HIGH',    10);  # cache, stats,.. on finalized data
