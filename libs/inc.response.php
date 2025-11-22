@@ -140,6 +140,13 @@ function route_std_path(string $path)
 #
 # Routing API
 
+
+/**
+ * $target_path - component alias or path to handler
+ *   component alias - routine component initialization & assign API
+ *   path to handler - everything above plus handler tree processing
+ *     (language file assign and every level initialization)
+ */
 function core_use_api($target_path)
 {
     global $_ROUTE_ROOT;

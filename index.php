@@ -32,6 +32,9 @@ require('config-global.php');
 require('config-server.php');
 require('config-custom.php');
 
+# debug & dump
+if (IS_VIP) require('libs/inc.dump.php');
+
 # include core libraries
 require('libs/inc.common.php');
 require('libs/inc.registry.php');
