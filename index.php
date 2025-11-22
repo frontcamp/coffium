@@ -41,6 +41,14 @@ require('libs/inc.registry.php');
 require('libs/inc.request.php');
 require('libs/inc.response.php');
 
+# run autorun
+$glob_init = COMS_ROOT.'/__init__.php';
+if (is_file($glob_init))
+{
+    require($glob_init);
+    sys_opt_push('ini.loaded', $glob_init);
+}
+
 # run router
 core_use_handler(sys_get('route.path'));
 

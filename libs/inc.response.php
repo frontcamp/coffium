@@ -156,6 +156,7 @@ function core_use_api($target_path)
     $path = '';
     foreach($parts as $level => $part)
     {
+        if ($part === '') continue;
         $path .= rtrim('/'.$part, '/');
 
         $lng_path = $_ROUTE_ROOT.$path.'/_lang';
