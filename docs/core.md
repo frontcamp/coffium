@@ -111,7 +111,7 @@ SERVER_TYPE = Local|Development|Production + суффикс -Cron для CLI/cro
 Это значение удобно использовать в качестве ```GET``` параметра для принудительной перезагрузки статики в браузере (стилей, скриптов и картинок). Например:
 
 ```php
-<link href="https://<server>/home/web/s/default.css?v=<?=TIME_HASH?>" rel="stylesheet" type="text/css">
+<link href="https://<server>/home/web/s/default.css?v=<?php echo TIME_HASH ?>" rel="stylesheet" type="text/css">
 ```
 
 ```PROJ_ROOT``` - абсолютный путь к корню системы/проекта, определяется как каталог, в котором находится данный файл конфигурации. Это позволяет располагать систему не только в корне сервера, но и в подкаталогах.
