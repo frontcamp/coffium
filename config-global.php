@@ -30,24 +30,23 @@ define('ML_DIR_SUPPORT', true);   # auto load /d1/d2/_lang/<name>.php files
  * SERVER TYPE
  */
 
-function norm_path($path)
-{
-    return str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $path);
-}
+$host = preg_replace('~:\d+$~', '', ($_SERVER['HTTP_HOST'] ?? ''));
+$ip = $_SERVER['SERVER_ADDR'] ?? '';
+$local_hosts = ['localhost', '127.0.0.1', '::1', '127.0.1.1'];
 
-# IMPORTANT: change to detect local project correctly!
-if (!defined('LOCAL_PATH_SIGN')) define('LOCAL_PATH_SIGN', 'server\domains\coffium');
+define('IS_CRON', substr(PHP_SAPI, 0, 3) == 'cli'
+              || substr(PHP_SAPI, 0, 6) == 'phpdbg'
+              || !isset($_SERVER['HTTP_HOST']));
 
-$sign_path_normalized = norm_path(LOCAL_PATH_SIGN);
-$self_path_normalized = norm_path(__DIR__);
+define('IS_LOCAL', in_array($host, $local_hosts, true)
+                || in_array($ip, $local_hosts, true));
 
-define('IS_CRON', substr(PHP_SAPI, 0, 3) == 'cli' || !isset($_SERVER['HTTP_HOST']));
-define('IS_LOCAL', (false !== stripos($self_path_normalized, $sign_path_normalized)));
-define('IS_DEV', substr(($_SERVER['HTTP_HOST'] ?? ''), 0, 4) == 'dev.');
-define('IS_PROD', !(IS_LOCAL || IS_DEV));
+define('IS_DEV', str_starts_with($host, 'dev.')
+              || str_starts_with($host, 'test.')
+              || str_ends_with($host, '.test')
+              || str_ends_with($host, '.local'));
 
-$env = IS_LOCAL ? 'Local' : (IS_DEV ? 'Development' : 'Production');
-define('SERVER_TYPE', $env.(IS_CRON ? '-Cron' : ''));
+define('IS_PROD', !IS_LOCAL && !IS_DEV);
 
 
 /**
