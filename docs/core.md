@@ -192,21 +192,21 @@ if (!defined('APP_FEATURE_X_ENABLED')) {
 
 Сохраняются следующие значения:
 
-`request.scheme` = `<http|https>`
-`request.port` = `<порт>`
-`request.host` = `<имя сервера>`
-`request.uri` = `<URL-путь ? GET-параметры>`
-`request.query_raw` = `<?get_query>`
-`request.query_str` = `<get_query>`
-`request.root` = `<scheme://root:port>` (порт указывается только если отличается от 80 или 443)
-`request.path` = `<URL-путь>`
-`request.orig` = `<URL-адрес>`
-`request.base` = `<базовый URL-адрес>` (без GET параметров)
+- `request.scheme` = `<http|https>`
+- `request.port` = `<порт>`
+- `request.host` = `<имя сервера>`
+- `request.uri` = `<URL-путь ? GET-параметры>`
+- `request.query_raw` = `<?get_query>`
+- `request.query_str` = `<get_query>`
+- `request.root` = `<scheme://root:port>` (порт указывается только если отличается от 80 или 443)
+- `request.path` = `<URL-путь>`
+- `request.orig` = `<URL-адрес>`
+- `request.base` = `<базовый URL-адрес>` (без GET параметров)
 
-`route.path_raw` = `<валидированный request.path>`
-`route.path` = `<route.path_raw>` (начальное значение)
-`route.chunks_raw` = `<сегменты route.path>`
-`route.chunks` = `<route.chunks_raw>` (начальное значение)
+- `route.path_raw` = `<валидированный request.path>`
+- `route.path` = `<route.path_raw>` (начальное значение)
+- `route.chunks_raw` = `<сегменты route.path>`
+- `route.chunks` = `<route.chunks_raw>` (начальное значение)
 
 Параметры `route.path` и `route.chunks` изменяются в процессе маршрутизации. Первоначальные значения хранятся в ключах `route.path_raw` и `route.chunks_raw`.
 
