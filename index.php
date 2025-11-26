@@ -4,9 +4,9 @@ $GLOBALS['SYS']['included'][] = __FILE__;
 $GLOBALS['SYS']['runtime'] = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
 
 # check PHP version
-if (version_compare(PHP_VERSION, '8.3.0', '<'))
+if (version_compare(PHP_VERSION, '8.0.0', '<'))
 {
-    die('Required PHP version 8.3.0 or higher! Current: '.PHP_VERSION);
+    die('Required PHP version 8.0.0 or higher! Current: '.PHP_VERSION);
 }
 
 # core ID
