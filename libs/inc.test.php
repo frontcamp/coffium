@@ -57,34 +57,52 @@ function _assert($value, ...$args)
 }
 
 
+# Terminology:
+#   equal: == (True with type casting: 'a' == True, 12 == '12')
+#   same: === (True only if value and type are equal)
+
+# truth check
+
 function core_assert($v) { return _assert($v == true, $v); }
+function core_assert_true($v) { return _assert($v === true, $v); }
+function core_assert_false($v) { return _assert($v === false, $v); }
+function core_assert_empty($v) { return _assert(empty($v), $v); }
+function core_assert_zero($v) { return _assert($v === 0, $v); }
+function core_assert_null($v) { return _assert(is_null($v), $v); }
+function core_assert_pnull($v) { return _assert(is_pnull($v), $v); }
+
+# type check
+
 function core_assert_array($a) { return _assert(is_array($a), '$a'); }
 function core_assert_bool($v) { return _assert(is_bool($v), $v); }
+function core_assert_int($v) { return _assert(is_int($v), $v); }
+function core_assert_float($v) { return _assert(is_float($v), $v); }
+function core_assert_numeric($v) { return _assert(is_numeric($v), $v); }
+function core_assert_string($v) { return _assert(is_string($v), $v); }
+function core_assert_object($v) { return _assert(is_object($v), $v); }
+function core_assert_resource($r) { return _assert(is_resource($r), strval($r)); }
+
+# check values & comparison
+
+function core_assert_equal($a, $b) { return _assert($a == $b, $a, $b); }
+function core_assert_same($a, $b) { return _assert($a === $b, $a, $b); }
+function core_assert_same_arrays($a1, $a2) { return _assert(_vhash($a1) === _vhash($a2), '$a1, $a2'); }
+function core_assert_gt($a, $b) { return _assert($a > $b, $a, $b); }
+function core_assert_gte($a, $b) { return _assert($a >= $b, $a, $b); }
+function core_assert_lt($a, $b) { return _assert($a < $b, $a, $b); }
+function core_assert_lte($a, $b) { return _assert($a <= $b, $a, $b); }
+
+# constants & keys
+
 function core_assert_defined($c) { return _assert(defined($c), $c); }
 function core_assert_defined_and_equal($c, $v) { return _assert(defined($c), $c) && _assert(constant($c) == $v, $c, $v); }
 function core_assert_defined_and_same($c, $v) { return _assert(defined($c), $c) && _assert(constant($c) === $v, $c, $v); }
-function core_assert_dir($p) { return _assert(is_dir($p), $p); }
-function core_assert_empty($v) { return _assert(empty($v), $v); }
-function core_assert_equal($a, $b) { return _assert($a == $b, $a, $b); }
-function core_assert_false($v) { return _assert($v === false, $v); }
-function core_assert_file($p) { return _assert(is_file($p), $p); }
-function core_assert_float($v) { return _assert(is_float($v), $v); }
-function core_assert_gt($a, $b) { return _assert($a > $b, $a, $b); }
-function core_assert_gte($a, $b) { return _assert($a >= $b, $a, $b); }
-function core_assert_int($v) { return _assert(is_int($v), $v); }
 function core_assert_key_exists($k, $a) { return _assert(array_key_exists($k, $a), $k, '$a'); }
-function core_assert_lt($a, $b) { return _assert($a < $b, $a, $b); }
-function core_assert_lte($a, $b) { return _assert($a <= $b, $a, $b); }
-function core_assert_null($v) { return _assert(is_null($v), $v); }
-function core_assert_numeric($v) { return _assert(is_numeric($v), $v); }
-function core_assert_object($v) { return _assert(is_object($v), $v); }
-function core_assert_pnull($v) { return _assert(is_pnull($v), $v); }
-function core_assert_resource($r) { return _assert(is_resource($r), strval($r)); }
-function core_assert_same($a, $b) { return _assert($a === $b, $a, $b); }
-function core_assert_same_arrays($a1, $a2) { return _assert(_vhash($a1) === _vhash($a2), '$a1, $a2'); }
-function core_assert_string($v) { return _assert(is_string($v), $v); }
-function core_assert_true($v) { return _assert($v === true, $v); }
-function core_assert_zero($v) { return _assert($v === 0, $v); }
+
+# file system
+
+function core_assert_file($p) { return _assert(is_file($p), $p); }
+function core_assert_dir($p) { return _assert(is_dir($p), $p); }
 
 
 # if $path is a script file - run all *_test functions in this file
