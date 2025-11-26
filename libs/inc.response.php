@@ -55,12 +55,12 @@ class CoreTerminateRoute extends RuntimeException
     public ?int $redirect_status;
     public ?string $redirect_by;
 
-    public function __construct(?string $redirect_url = null,
-                                   ?int $redirect_status = null,
-                                ?string $redirect_by = null,
-                                 string $message = 'Route terminated',
-                                    int $code = 0,
-                             ?Throwable $previous = null)
+    public function __construct(string $message = 'Route terminated',
+                                   int $code = 0,
+                            ?Throwable $previous = null,
+                               ?string $redirect_url = null,
+                                  ?int $redirect_status = null,
+                               ?string $redirect_by = null)
     {
         parent::__construct($message, $code, $previous);
         $this->redirect_url    = $redirect_url;
@@ -83,7 +83,7 @@ class CoreTerminateRoute extends RuntimeException
  */
 function core_terminate_route(string $message = 'Route terminated')
 {
-    throw new CoreTerminateRoute(null, null, null, $message);
+    throw new CoreTerminateRoute($message);
 }
 
 /**
@@ -96,7 +96,7 @@ function core_terminate_and_redirect(string $location,
                                     ?string $x_redirect_by = CORE_NAME,
                                      string $message = 'Route terminated with redirect')
 {
-    throw new CoreTerminateRoute($location, $status, $x_redirect_by, $message);
+    throw new CoreTerminateRoute($message, 0, null, $location, $status, $x_redirect_by);
 }
 
 #
