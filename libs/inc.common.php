@@ -69,7 +69,7 @@ function ntrim($value, $min, $max)
 }
 
 
-function redirect($location, $status = 302, $x_redirect_by=CORE_NAME)
+function redirect($location, $status=302, $x_redirect_by=CORE_NAME)
 {
     if (!is_int($status) || $status < 300 || $status > 399) {
         trigger_error('HTTP redirect status code must be a redirection code, 3xx.', E_USER_ERROR);
