@@ -14,6 +14,10 @@ define('FRAMEWORK', 'Coffium');
 define('CORE_NAME', 'White Tiger');
 define('CORE_VERSION', '0.5');
 
+# core response statuses
+define('C_STATUS_OK',         0);
+define('C_STATUS_TERMINATED', 1);
+
 # finalizer priorities
 define('FIN_PRIO_LOW',     -5);  # data processing, pre-finalization
 define('FIN_PRIO_NORMAL',   0);  # routine finalizations, by default
@@ -41,16 +45,49 @@ require('libs/inc.registry.php');
 require('libs/inc.request.php');
 require('libs/inc.response.php');
 
-# run autorun
-$glob_init = COMS_ROOT.'/__init__.php';
-if (is_file($glob_init))
+try
 {
-    require($glob_init);
-    sys_opt_push('ini.loaded', $glob_init);
-}
+    # run autorun
+    $glob_init = COMS_ROOT.'/__init__.php';
+    if (is_file($glob_init))
+    {
+        require($glob_init);
+        sys_opt_push('ini.loaded', $glob_init);
+    }
 
-# run router
-core_use_handler(sys_get('route.path'));
+    # run router
+    core_use_handler(sys_get('route.path'));
+
+    # set response status
+    sys_opt('response', 'status', C_STATUS_OK);
+}
+catch (CoreTerminateRoute $e)
+{
+    $message = $e->getMessage();
+
+    # set response status
+    sys_opt('response', 'status', C_STATUS_TERMINATED);
+    sys_opt('response', 'message', $message);
+
+    if ($e->hasRedirect())
+    {
+        $location = $e->redirect_url;
+        $status   = $e->redirect_status ?? 302;
+        $by       = $e->redirect_by ?? CORE_NAME;
+
+        # register redirect finalizer
+        register_finalizer(
+            function () use ($location, $status, $by) {
+                redirect($location, $status, $by);
+            },
+            PHP_INT_MAX
+        );
+
+        sys_opt('response', 'redir_url',  $location);
+        sys_opt('response', 'redir_code', $status);
+        sys_opt('response', 'redir_by',   $by);
+    }
+}
 
 # run finalizers (allow registration during execution)
 if (IS_VIP) $_FINALIZERS_SNAPSHOT = $_FINALIZERS;  # debug

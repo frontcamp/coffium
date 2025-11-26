@@ -42,6 +42,64 @@ $_H_PRELOAD_CSS_INIT_POS = 0;  # hdl.preload.css initial sub-stack last position
 $_H_PRELOAD_JS_INIT_POS = 0;   # hdl.preload.js initial sub-stack last position
 
 #
+# Termination API
+
+/**
+ * Internal signal to immediately terminate current route processing.
+ *
+ * Optionally carries redirect parameters to be applied after finalization.
+ */
+class CoreTerminateRoute extends RuntimeException
+{
+    public ?string $redirect_url;
+    public ?int $redirect_status;
+    public ?string $redirect_by;
+
+    public function __construct(?string $redirect_url = null,
+                                   ?int $redirect_status = null,
+                                ?string $redirect_by = null,
+                                 string $message = 'Route terminated',
+                                    int $code = 0,
+                             ?Throwable $previous = null)
+    {
+        parent::__construct($message, $code, $previous);
+        $this->redirect_url    = $redirect_url;
+        $this->redirect_status = $redirect_status;
+        $this->redirect_by     = $redirect_by;
+    }
+
+    public function hasRedirect(): bool
+    {
+        return $this->redirect_url !== null;
+    }
+}
+
+/**
+ * Emergency route termination without redirect.
+ *
+ * Can be used in handlers, templates, APIs, etc.
+ *
+ * @throws CoreTerminateRoute
+ */
+function core_terminate_route(string $message = 'Route terminated')
+{
+    throw new CoreTerminateRoute(null, null, null, $message);
+}
+
+/**
+ * Emergency route termination with final redirect.
+ *
+ * @throws CoreTerminateRoute
+ */
+function core_terminate_and_redirect(string $location,
+                                        int $status = 302,
+                                    ?string $x_redirect_by = CORE_NAME,
+                                     string $message = 'Route terminated with redirect')
+{
+    throw new CoreTerminateRoute($location, $status, $x_redirect_by, $message);
+}
+
+#
 # Route ROOT API
 
 $_ROUTE_ROOT = COMS_ROOT;
