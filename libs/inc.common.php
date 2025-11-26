@@ -4,14 +4,14 @@ $GLOBALS['SYS']['included'][] = __FILE__;
 /* Common functionality */
 
 
-function bool_to_int($b) { return $b === true ? 1 : 0; }
+function bool_to_int($v) { return $v === true ? 1 : 0; }
+function int_to_bool($v) { return $v >= 1 ? true : false; }
 
-function bool_to_onoff($b) { return $b === true ? 'On' : 'Off'; }
+function bool_to_onoff($v) { return $v === true ? 'On' : 'Off'; }
+function bool_to_yesno($v) { return $v === true ? 'Yes' : 'No'; }
 
-function bool_to_yesno($b) { return $b === true ? 'Yes' : 'No'; }
-
-
-function int_to_bool($i) { return $i >= 1 ? true : false; }
+function some_to_onoff($v) { return $v == true ? 'On' : 'Off'; }
+function some_to_yesno($v) { return $v == true ? 'Yes' : 'No'; }
 
 
 // Returns a new empty array *by reference*

@@ -99,7 +99,7 @@ ini_set('session.use_cookies', 1);
 
 if (!IS_CRON)
 {
-    session_name('SMSID');  # session cookie name
+    session_name('CFMID');  # session cookie name
     if (session_id() == '') session_start();
     #setcookie(session_name(), session_id(), time() + PHP_SESSION_LIFETIME, '/');
 }
