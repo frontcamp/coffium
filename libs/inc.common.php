@@ -89,6 +89,74 @@ function reload()
 }
 
 
+function abspath_to_rel(string $path, string $proj_root): string
+{
+    $ds = DIRECTORY_SEPARATOR;
+
+    $normalize = static function (string $p) use ($ds): string {
+        // Normalize all separators to the current OS
+        $p = str_replace(['/', '\\'], $ds, $p);
+
+        // Collapse duplicate separators (e.g. "//" -> "/")
+        $p = preg_replace('~' . preg_quote($ds, '~') . '+~', $ds, $p);
+
+        // On Windows, keep pure drive roots like "C:\"
+        if ($ds === '\\') {
+            if (preg_match('~^[A-Za-z]:\\\\$~', $p)) {
+                return strtoupper($p);
+            }
+        }
+
+        // Trim trailing separator except for root ("/" or "C:\")
+        if (strlen($p) > 1) {
+            $p = rtrim($p, $ds);
+        }
+
+        return $p;
+    };
+
+    $pathNorm = $normalize($path);
+    $rootNorm = $normalize($proj_root);
+
+    // If path is exactly the project root, return a single separator
+    if ($pathNorm === $rootNorm) {
+        return $ds;
+    }
+
+    // Special case: project root is filesystem root ("/" on Unix)
+    if ($rootNorm === $ds) {
+        $rel = ltrim($pathNorm, $ds);
+        return $rel === '' ? $ds : $rel;
+    }
+
+    $isWindows = ($ds === '\\');
+
+    // Case-insensitive comparison on Windows, case-sensitive on Unix
+    $pathCmp = $isWindows ? strtolower($pathNorm) : $pathNorm;
+    $rootCmp = $isWindows ? strtolower($rootNorm) : $rootNorm;
+
+    $rootLen = strlen($rootCmp);
+
+    // Safety check: ensure $path is within $proj_root
+    if (strncmp($pathCmp, $rootCmp, $rootLen) !== 0) {
+        throw new InvalidArgumentException('Path is not within project root');
+    }
+
+    // Boundary check: next char must be empty or a separator
+    $nextChar = substr($pathCmp, $rootLen, 1);
+    if ($nextChar !== '' && $nextChar !== $ds) {
+        throw new InvalidArgumentException('Path is not within project root');
+    }
+
+    // Strip project root prefix and leading separator
+    $rel = substr($pathNorm, $rootLen);
+    $rel = ltrim($rel, $ds);
+
+    // If somehow empty, treat as project root
+    return $rel === '' ? $ds : $rel;
+}
+
+
 function rmtree($path)
 {
     if (!is_dir($path)) return;

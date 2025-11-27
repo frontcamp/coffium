@@ -10,10 +10,45 @@ if (!defined('P_NULL'))
     die();
 }
 
+global $_CORE_TEST_STATS;
+$_CORE_TEST_STATS ??= [
+    'files'     => 0,  // test files count
+    'functions' => 0,  // test functions called (*_test())
+    'asserts'   => 0,  // asserts runned
+    'failed'    => 0,  // asserts failed
+];
+
+function core_test_stats_reset()
+{
+    global $_CORE_TEST_STATS;
+    $_CORE_TEST_STATS = [
+        'files'     => 0,
+        'functions' => 0,
+        'asserts'   => 0,
+        'failed'    => 0,
+    ];
+}
+
+function core_test_print_summary()
+{
+    global $_CORE_TEST_STATS;
+
+    $passed = $_CORE_TEST_STATS['asserts'] - $_CORE_TEST_STATS['failed'];
+
+    print '<p class="summary"><b>Summary</b>:'
+         .' files: <b>'.$_CORE_TEST_STATS['files'].'</b>,'
+         .' functions: <b>'.$_CORE_TEST_STATS['functions'].'</b>,'
+         .' assertions: <b>'.$_CORE_TEST_STATS['asserts'].'</b>,'
+         .' passed: <b>'.$passed.'</b>,'
+         .' failed: <b>'.$_CORE_TEST_STATS['failed'].'</b></p>'.PHP_EOL;
+}
+
 function _vhash($v) { return md5(serialize($v)); }
 
 function _assert($value, ...$args)
 {
+    global $_CORE_TEST_STATS;
+
     # reaching backtrace data
     $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
     $frame = $backtrace[1] ?? $backtrace[0];
@@ -21,6 +56,8 @@ function _assert($value, ...$args)
     $file = $frame['file'] ?? 'unknown';
     $line = $frame['line'] ?? 0;
     $func = $frame['function'] ?? '{global}';
+
+    $path_rel = abspath_to_rel($file, PROJ_ROOT);
 
     # extra info
     $vdmp_raw = '';
@@ -36,24 +73,26 @@ function _assert($value, ...$args)
     }
 
     # assertion
-    if ($value === true) {
+    $_CORE_TEST_STATS['asserts']++;
+    if ($value === true)
+    {
         if (isset($_REQUEST['verbose'])) {
-            print("<b>Assertion passed!</b> "
-                 ."Function: <b>{$func}($vdmp_prn)</b>"
-                 ." called from: <b>{$file}</b>"
-                 ." on line: <b>{$line}</b><br>\n");
+            print("<p><b style='color:green;'>Passed:</b>"
+                 ." {$func}(<b>$vdmp_prn</b>)"
+                 ." from {$path_rel}:{$line}</p>\n");
         }
         return true;
     }
-
-    # output
-    error_log("Assertion failed! {$func}($vdmp_raw)"
-             ." in {$file}:{$line}");
-    print("<b>Assertion failed!</b> "
-         ."Function: <b>{$func}($vdmp_prn)</b>"
-         ." called from: <b>{$file}</b>"
-         ." on line: <b>{$line}</b><br>\n");
-    return false;
+    else
+    {
+        $_CORE_TEST_STATS['failed']++;
+        error_log("Assertion failed! {$func}($vdmp_raw)"
+                 ." from {$path_rel}:{$line}");
+        print("<p><b style='color:red;'>Failed:</b>"
+             ." {$func}(<b>$vdmp_prn</b>)"
+             ." from {$path_rel}:{$line}</p>\n");
+        return false;
+    }
 }
 
 
@@ -94,9 +133,9 @@ function core_assert_lte($a, $b) { return _assert($a <= $b, $a, $b); }
 
 # constants & keys
 
-function core_assert_defined($c) { return _assert(defined($c), $c); }
-function core_assert_defined_and_equal($c, $v) { return _assert(defined($c), $c) && _assert(constant($c) == $v, $c, $v); }
-function core_assert_defined_and_same($c, $v) { return _assert(defined($c), $c) && _assert(constant($c) === $v, $c, $v); }
+function core_assert_const($c) { return _assert(defined($c), $c); }
+function core_assert_const_and_equal($c, $v) { return _assert(defined($c), $c) && _assert(constant($c) == $v, $c, $v); }
+function core_assert_const_and_same($c, $v) { return _assert(defined($c), $c) && _assert(constant($c) === $v, $c, $v); }
 function core_assert_key_exists($k, $a) { return _assert(array_key_exists($k, $a), $k, '$a'); }
 
 # file system
@@ -105,48 +144,60 @@ function core_assert_file($p) { return _assert(is_file($p), $p); }
 function core_assert_dir($p) { return _assert(is_dir($p), $p); }
 
 
-# if $path is a script file - run all *_test functions in this file
 # if $path is a folder - run all test scripts in this folder and its subfolders
-function launch_tests($path)
+# if $path is a script file - run all *_test functions in this file
+function launch_tests($path, $_top_call=true)
 {
+    global $_CORE_TEST_STATS;
+
+    if ($_top_call) core_test_stats_reset();  # initialize stats
+
     $path = rtrim($path, '\\/');
 
-    # skip symlinks
-    if (is_link($path)) return;
-
-    if (is_dir($path))  // run all tests in the folder
+    if (is_dir($path))
     {
-        $file_list = scandir($path, SCANDIR_SORT_NONE);  # order doesn't matter
+        if (is_link($path)) return;  # skip symlinks
+
+        # run all tests in the folder
+        $file_list = scandir($path, SCANDIR_SORT_ASCENDING);
         foreach($file_list as $file_name)
         {
             if ($file_name == '.' || $file_name == '..') continue;
-            launch_tests($path.'/'.$file_name);  # recursion!
+            launch_tests($path.'/'.$file_name, false);  # recursion
         }
-        return;
     }
-
-    # skip non PHP files
-    if (is_file($path) && !str_ends_with($path, '.php')) return;
-
-    # must be existing and readable
-    if (!is_file($path))
+    else if (is_file($path))
     {
-        trigger_error('File does not exist and/or not readable:'.$path, E_USER_ERROR);
-        die();
-    }
+        if (!str_ends_with($path, '.php')) return;  # skip non PHP files
 
-    $funcs = get_defined_functions()["user"];
-    require($path);
-    $tests = array_values(array_diff(get_defined_functions()["user"], $funcs));
+        $funcs = get_defined_functions()["user"];
+        require($path);
+        $tests = array_values(array_diff(get_defined_functions()["user"], $funcs));
 
-    foreach($tests as $test_func)
-    {
-        if (str_starts_with($test_func, '_')) continue;  # skip privates
-        if (str_ends_with($test_func, '_test'))
+        # leave public *_test functions only
+        $tests = array_filter($tests, static function ($fn) {
+            return !str_starts_with($fn, '_') && str_ends_with($fn, '_test');
+        });
+
+        if (empty($tests)) return;  # nothing to do here
+
+        $_CORE_TEST_STATS['files']++;
+
+        $path_rel = abspath_to_rel($path, PROJ_ROOT);
+        print "<hr>\n";
+        print "<h2>Test module: <b>$path_rel</b></h2>\n";
+
+        foreach($tests as $test_func)
         {
-            if (isset($_REQUEST['verbose'])) { print "<hr>Test: file <b>$path</b>, function <b>$test_func()</b><br>\n"; }
-            $test_func();  # run test
+            $_CORE_TEST_STATS['functions']++;
+
+            if (isset($_REQUEST['verbose'])) {
+                print "<h3>Function: <b>$test_func()</b></h3>\n";
+            }
+            $test_func();  # run test(s)
         }
     }
+
+    if ($_top_call) core_test_print_summary();
 }
 
