@@ -1,5 +1,5 @@
 
-<table>
+<table width="100%" cellpadding="4" cellspacing="0" border="1">
     <thead>
         <tr>
             <th>Parameter</th>

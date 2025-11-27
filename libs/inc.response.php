@@ -133,7 +133,7 @@ function store_route_root()
 #
 # Common
 
-function hdl_to_str(int $flags)
+function _hdl_to_str(int $flags)
 {
     if ($flags === HDL_NONE) return '<none>';
 
@@ -147,7 +147,7 @@ function hdl_to_str(int $flags)
     return '<'.trim($s, '|').'>';
 }
 
-function load_translations($lng_path)
+function core_load_translations($lng_path)
 {
     global $DICTIONARY;
     if (!isset($DICTIONARY)) $DICTIONARY = array();  # init
@@ -161,12 +161,12 @@ function load_translations($lng_path)
             $GLOBALS['SYS']['included'][] = $lng_path.'/'.$file_name;
             require($lng_path.'/'.$file_name);
         } elseif (is_dir($new_path)) {
-            load_translations($new_path);  # recursion!
+            core_load_translations($new_path);  # recursion!
         }
     }
 }
 
-function route_mk_path(string $root = NULL,
+function _route_mk_path(string $root = NULL,
                        string $path = '',
                        string $name = '',
                        string $prefix = '',
@@ -174,7 +174,7 @@ function route_mk_path(string $root = NULL,
 {
     global $_ROUTE_ROOT;
     if (is_null($root)) $root = $_ROUTE_ROOT;
-    $path = route_std_path($path);
+    $path = _route_std_path($path);
     if (!empty($prefix)) $prefix = trim($prefix, '.').'.';
     if (!empty($suffix)) $suffix = '.'.trim($suffix, '.');
     return $root.$path.'/'.$prefix.$name.$suffix;
@@ -184,7 +184,7 @@ function route_mk_path(string $root = NULL,
 # - must be of a string type
 # - convert from user-friendly to a system valid ('p1.p2.p3' => '/p1/p2/p3')
 # - avoid (remove) single slash to be concatenate-friendly
-function route_std_path(string $path)
+function _route_std_path(string $path)
 {
     $dtos = str_replace('.', '/', $path);  # replace "." to "/"
 
@@ -208,7 +208,7 @@ function route_std_path(string $path)
 function core_use_api($target_path)
 {
     global $_ROUTE_ROOT;
-    $target_path = route_std_path($target_path);
+    $target_path = _route_std_path($target_path);
     $parts = explode('/', $target_path);
 
     $path = '';
@@ -218,16 +218,16 @@ function core_use_api($target_path)
         $path .= rtrim('/'.$part, '/');
 
         $lng_path = $_ROUTE_ROOT.$path.'/_lang';
-        $inf_file = route_mk_path($_ROUTE_ROOT, $path, COM_INF_FNAME);
-        $ini_file = route_mk_path($_ROUTE_ROOT, $path, COM_INI_FNAME);
-        $api_file = route_mk_path($_ROUTE_ROOT, $path, DEF_API_FNAME);
+        $inf_file = _route_mk_path($_ROUTE_ROOT, $path, COM_INF_FNAME);
+        $ini_file = _route_mk_path($_ROUTE_ROOT, $path, COM_INI_FNAME);
+        $api_file = _route_mk_path($_ROUTE_ROOT, $path, DEF_API_FNAME);
 
         # LNG files can be on any level
         if (ML_DIR_SUPPORT
         and !sys_opt_has_value('lng.loaded', $lng_path)
         and is_dir($lng_path))
         {
-            load_translations($lng_path);
+            core_load_translations($lng_path);
             sys_opt_push_unique('lng.loaded', $lng_path);
         }
 
@@ -299,7 +299,7 @@ function core_use_handler(string $path,
            $_H_PRELOAD_JS_INIT_POS,
            $_ROUTE_ROOT;
 
-    $path = route_std_path($path);
+    $path = _route_std_path($path);
 
     # check handler type flags
     if (!( $flags & (HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS) )) {
@@ -313,8 +313,8 @@ function core_use_handler(string $path,
 
     if (!is_null($_name))  # if not coordinational function call..
     {
-        $stack_name = $path.' > '.$_name.' '.hdl_to_str($flags);
-        sys_opt_add('route.stack', $stack_name, hdl_to_str(HDL_NONE));
+        $stack_name = $path.' > '.$_name.' '._hdl_to_str($flags);
+        sys_opt_add('route.stack', $stack_name, _hdl_to_str(HDL_NONE));
     }
 
     if (is_dir($_ROUTE_ROOT.$path))  # given path exists
@@ -334,15 +334,15 @@ function core_use_handler(string $path,
             $handler_return = NULL;  # for output buffering purposes
             $handler_found = HDL_NONE;
 
-            $act_path = route_mk_path($_ROUTE_ROOT, $path, $_name, 'act', 'php');
-            $tpl_path = route_mk_path($_ROUTE_ROOT, $path, $_name, 'tpl', 'php');
+            $act_path = _route_mk_path($_ROUTE_ROOT, $path, $_name, 'act', 'php');
+            $tpl_path = _route_mk_path($_ROUTE_ROOT, $path, $_name, 'tpl', 'php');
 
-            $css_path = route_mk_path($_ROUTE_ROOT, route_std_path($path.'/web/s'), $_name, '', 'css');
-            $css_url_path = route_mk_path('', route_std_path($path.'/web/s'), $_name, '', 'css');
+            $css_path = _route_mk_path($_ROUTE_ROOT, _route_std_path($path.'/web/s'), $_name, '', 'css');
+            $css_url_path = _route_mk_path('', _route_std_path($path.'/web/s'), $_name, '', 'css');
             $css_url_root = sys_opt_get('request', 'root').COMS_PATH.$css_url_path;
 
-            $js_path = route_mk_path($_ROUTE_ROOT, route_std_path($path.'/web/s'), $_name, '', 'js');
-            $js_url_path = route_mk_path('', route_std_path($path.'/web/s'), $_name, '', 'js');
+            $js_path = _route_mk_path($_ROUTE_ROOT, _route_std_path($path.'/web/s'), $_name, '', 'js');
+            $js_url_path = _route_mk_path('', _route_std_path($path.'/web/s'), $_name, '', 'js');
             $js_url_root = sys_opt_get('request', 'root').COMS_PATH.$js_url_path;
 
             if ($flags & HDL_ACT and is_file($act_path)) $handler_found |= HDL_ACT;
@@ -352,7 +352,7 @@ function core_use_handler(string $path,
 
             if ($handler_found)
             {
-                sys_opt_set('route.stack', $stack_name, hdl_to_str($handler_found));
+                sys_opt_set('route.stack', $stack_name, _hdl_to_str($handler_found));
 
                 if ($handler_found & (HDL_ACT | HDL_TPL)) core_use_api($path);
 
@@ -454,9 +454,9 @@ function core_use_handler(string $path,
 #
 # Build endpoint URL by handler path
 
-function handler_route_path_to_url($handler_path)
+function core_route_path_to_url($handler_path)
 {
-    $path = route_std_path($handler_path);
+    $path = _route_std_path($handler_path);
     return sys_opt_get('request', 'root') . $path;
 }
 
@@ -464,16 +464,16 @@ function handler_route_path_to_url($handler_path)
 # Build static URL path/root
 
 /* Alias to static_url_path() */
-function static_url($dir=NULL)
+function core_static_url($dir=NULL)
 {
-    return static_url_path($dir);
+    return core_static_url_path($dir);
 }
 
 /** Make URL path to static (/web) folder of the template
  * @var tpl_path string Path to the target template (or use script's __DIR__)
  * @return       string URL path to static folder (w/o tailing slash)
  */
-function static_url_path($tpl_path=NULL)
+function core_static_url_path($tpl_path=NULL)
 {
     if (is_null($tpl_path)) $tpl_path = COMS_ROOT;
     $tpl_path = str_replace('\\', '/', $tpl_path);
@@ -488,7 +488,7 @@ function static_url_path($tpl_path=NULL)
  * @var tpl_path string Path to the target template (or use script's __DIR__)
  * @return       string URL root to static folder (w/o tailing slash)
  */
-function static_url_root($tpl_path=NULL)
+function core_static_url_root($tpl_path=NULL)
 {
-    return sys_opt_get('request', 'root') . static_url_path($tpl_path);
+    return sys_opt_get('request', 'root').core_static_url_path($tpl_path);
 }

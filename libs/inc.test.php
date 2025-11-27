@@ -10,18 +10,18 @@ if (!defined('P_NULL'))
     die();
 }
 
-global $_CORE_TEST_STATS;
-$_CORE_TEST_STATS ??= [
+global $_TEST_STATS;
+$_TEST_STATS ??= [
     'files'     => 0,  // test files count
     'functions' => 0,  // test functions called (*_test())
     'asserts'   => 0,  // asserts runned
     'failed'    => 0,  // asserts failed
 ];
 
-function core_test_stats_reset()
+function _test_stats_reset()
 {
-    global $_CORE_TEST_STATS;
-    $_CORE_TEST_STATS = [
+    global $_TEST_STATS;
+    $_TEST_STATS = [
         'files'     => 0,
         'functions' => 0,
         'asserts'   => 0,
@@ -29,25 +29,25 @@ function core_test_stats_reset()
     ];
 }
 
-function core_test_print_summary()
+function _test_stats_print()
 {
-    global $_CORE_TEST_STATS;
+    global $_TEST_STATS;
 
-    $passed = $_CORE_TEST_STATS['asserts'] - $_CORE_TEST_STATS['failed'];
+    $passed = $_TEST_STATS['asserts'] - $_TEST_STATS['failed'];
 
     print '<p class="summary"><b>Summary</b>:'
-         .' files: <b>'.$_CORE_TEST_STATS['files'].'</b>,'
-         .' functions: <b>'.$_CORE_TEST_STATS['functions'].'</b>,'
-         .' assertions: <b>'.$_CORE_TEST_STATS['asserts'].'</b>,'
+         .' files: <b>'.$_TEST_STATS['files'].'</b>,'
+         .' functions: <b>'.$_TEST_STATS['functions'].'</b>,'
+         .' assertions: <b>'.$_TEST_STATS['asserts'].'</b>,'
          .' passed: <b>'.$passed.'</b>,'
-         .' failed: <b>'.$_CORE_TEST_STATS['failed'].'</b></p>'.PHP_EOL;
+         .' failed: <b>'.$_TEST_STATS['failed'].'</b></p>'.PHP_EOL;
 }
 
 function _vhash($v) { return md5(serialize($v)); }
 
 function _assert($value, ...$args)
 {
-    global $_CORE_TEST_STATS;
+    global $_TEST_STATS;
 
     # reaching backtrace data
     $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
@@ -73,7 +73,7 @@ function _assert($value, ...$args)
     }
 
     # assertion
-    $_CORE_TEST_STATS['asserts']++;
+    $_TEST_STATS['asserts']++;
     if ($value === true)
     {
         if (isset($_REQUEST['verbose'])) {
@@ -85,7 +85,7 @@ function _assert($value, ...$args)
     }
     else
     {
-        $_CORE_TEST_STATS['failed']++;
+        $_TEST_STATS['failed']++;
         error_log("Assertion failed! {$func}($vdmp_raw)"
                  ." from {$path_rel}:{$line}");
         print("<p><b style='color:red;'>Failed:</b>"
@@ -146,11 +146,11 @@ function core_assert_dir($p) { return _assert(is_dir($p), $p); }
 
 # if $path is a folder - run all test scripts in this folder and its subfolders
 # if $path is a script file - run all *_test functions in this file
-function launch_tests($path, $_top_call=true)
+function core_launch_tests($path, $_top_call=true)
 {
-    global $_CORE_TEST_STATS;
+    global $_TEST_STATS;
 
-    if ($_top_call) core_test_stats_reset();  # initialize stats
+    if ($_top_call) _test_stats_reset();  # initialize stats
 
     $path = rtrim($path, '\\/');
 
@@ -163,7 +163,7 @@ function launch_tests($path, $_top_call=true)
         foreach($file_list as $file_name)
         {
             if ($file_name == '.' || $file_name == '..') continue;
-            launch_tests($path.'/'.$file_name, false);  # recursion
+            core_launch_tests($path.'/'.$file_name, false); # recursion
         }
     }
     else if (is_file($path))
@@ -181,7 +181,7 @@ function launch_tests($path, $_top_call=true)
 
         if (empty($tests)) return;  # nothing to do here
 
-        $_CORE_TEST_STATS['files']++;
+        $_TEST_STATS['files']++;
 
         $path_rel = abs_to_rel($path, PROJ_ROOT);
         print "<hr>\n";
@@ -189,7 +189,7 @@ function launch_tests($path, $_top_call=true)
 
         foreach($tests as $test_func)
         {
-            $_CORE_TEST_STATS['functions']++;
+            $_TEST_STATS['functions']++;
 
             if (isset($_REQUEST['verbose'])) {
                 print "<h3>Function: <b>$test_func()</b></h3>\n";
@@ -198,6 +198,6 @@ function launch_tests($path, $_top_call=true)
         }
     }
 
-    if ($_top_call) core_test_print_summary();
+    if ($_top_call) _test_stats_print();
 }
 

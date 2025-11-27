@@ -19,7 +19,7 @@ function _formatted_backtrace($backtrace)
     return $s;
 }
 
-function core_dump(...$values)
+function _core_dump(...$values)
 {
     if (count($values) === 0)
     {
@@ -38,20 +38,7 @@ function core_dump(...$values)
     print $s;
 }
 
-function dump(...$values) { core_dump(...$values); }
-
-function dump_js_log(...$values)
-{
-    if (count($values) === 0) return;
-    $result = array();
-    foreach($values as $value)
-    {
-        $exported = var_export($value, true);
-        $sanitized = str_replace(array("\r\n", "\n", "\r"), '\n', $exported);
-        $result[] = $sanitized;
-    }
-    print('<script>console.log("'.implode('","', $result).'");</script>'.PHP_EOL);
-}
+function dump(...$values) { _core_dump(...$values); }
 
 function ndump($name, $value)
 {
@@ -71,9 +58,22 @@ function tdump(...$values)
     foreach($values as $index => $value)
     {
         print("\t\t<td valign='top'>\n");
-        print(core_dump($value));
+        print(_core_dump($value));
         print("\t\t</td>\n");
     }
     print("\t</tr>\n</table>\n");
+}
+
+function dump_js_log(...$values)
+{
+    if (count($values) === 0) return;
+    $result = array();
+    foreach($values as $value)
+    {
+        $exported = var_export($value, true);
+        $sanitized = str_replace(array("\r\n", "\n", "\r"), '\n', $exported);
+        $result[] = $sanitized;
+    }
+    print('<script>console.log("'.implode('","', $result).'");</script>'.PHP_EOL);
 }
 

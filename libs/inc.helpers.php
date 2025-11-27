@@ -152,6 +152,6 @@ if (isset($_REQUEST['dump-finalizers']))
 if (isset($_REQUEST['core-test']))
 {
     require_once('inc.test.php');
-    launch_tests(PROJ_ROOT.'/libs/tests/');
+    core_launch_tests(PROJ_ROOT.'/libs/tests/');
 }
 

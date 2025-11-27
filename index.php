@@ -15,26 +15,26 @@ define('CORE_NAME', 'White Tiger');
 define('CORE_VERSION', '0.5');
 
 # core response statuses
-define('C_STATUS_OK',         0);
-define('C_STATUS_TERMINATED', 1);
+define('CORE_STATUS_OK',         0);
+define('CORE_STATUS_TERMINATED', 1);
 
 # finalizer priorities
-define('FIN_PRIO_LOW',     -5);  # data processing, pre-finalization
-define('FIN_PRIO_NORMAL',   0);  # routine finalizations, by default
-define('FIN_PRIO_HIGH',    10);  # cache, stats,.. on finalized data
-define('FIN_PRIO_HIGHEST', 50);  # shutdown of critical resources (DB, FS)
+define('CORE_PRIO_LOW',     -5);  # data processing, pre-finalization
+define('CORE_PRIO_NORMAL',   0);  # routine finalizations, by default
+define('CORE_PRIO_HIGH',    10);  # cache, stats,.. on finalized data
+define('CORE_PRIO_HIGHEST', 50);  # shutdown of critical resources (DB, FS)
 
 $_FINALIZERS = array();
-function register_finalizer(callable $func_name, int $priority=FIN_PRIO_NORMAL)
+function core_register_finalizer(callable $func_name, int $priority=CORE_PRIO_NORMAL)
 {
     global $_FINALIZERS;
     $_FINALIZERS[$priority][] = $func_name;
 }
 
 # initialization
-require('config-global.php');
-require('config-server.php');
-require('config-custom.php');
+require('cfg.global.php');
+require('cfg.server.php');
+require('cfg.custom.php');
 
 # debug & dump
 if (IS_VIP) require('libs/inc.dump.php');
@@ -59,14 +59,14 @@ try
     core_use_handler(sys_get('route.path'));
 
     # set response status
-    sys_opt('response', 'status', C_STATUS_OK);
+    sys_opt('response', 'status', CORE_STATUS_OK);
 }
 catch (CoreTerminateRoute $e)
 {
     $message = $e->getMessage();
 
     # set response status
-    sys_opt('response', 'status', C_STATUS_TERMINATED);
+    sys_opt('response', 'status', CORE_STATUS_TERMINATED);
     sys_opt('response', 'message', $message);
 
     if ($e->hasRedirect())
@@ -76,7 +76,7 @@ catch (CoreTerminateRoute $e)
         $by       = $e->redirect_by ?? CORE_NAME;
 
         # register redirect finalizer
-        register_finalizer(
+        core_register_finalizer(
             function () use ($location, $status, $by) {
                 redirect($location, $status, $by);
             },

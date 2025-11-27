@@ -50,7 +50,7 @@ function is_decimal(string $value) { return (false !== strpos($value, '.')); }
 
 
 /* Return true if the value is an integer or a string representing an integer, false otherwise */
-function is_int_adv($value)
+function is_int_like($value)
 {
     if (is_int($value)) return true;
     if (!is_string($value)) return false;
@@ -115,41 +115,41 @@ function abs_to_rel(string $path, string $root=PROJ_ROOT): string
         return $p;
     };
 
-    $pathNorm = $normalize($path);
-    $rootNorm = $normalize($root);
+    $path_norm = $normalize($path);
+    $root_norm = $normalize($root);
 
     // If path is exactly the project root, return a single separator
-    if ($pathNorm === $rootNorm) {
+    if ($path_norm === $root_norm) {
         return $ds;
     }
 
     // Special case: project root is filesystem root ("/" on Unix)
-    if ($rootNorm === $ds) {
-        $rel = ltrim($pathNorm, $ds);
+    if ($root_norm === $ds) {
+        $rel = ltrim($path_norm, $ds);
         return $rel === '' ? $ds : $rel;
     }
 
     $isWindows = ($ds === '\\');
 
     // Case-insensitive comparison on Windows, case-sensitive on Unix
-    $pathCmp = $isWindows ? strtolower($pathNorm) : $pathNorm;
-    $rootCmp = $isWindows ? strtolower($rootNorm) : $rootNorm;
+    $path_cmp = $isWindows ? strtolower($path_norm) : $path_norm;
+    $root_cmp = $isWindows ? strtolower($root_norm) : $root_norm;
 
-    $rootLen = strlen($rootCmp);
+    $root_len = strlen($root_cmp);
 
     // Safety check: ensure $path is within $root
-    if (strncmp($pathCmp, $rootCmp, $rootLen) !== 0) {
+    if (strncmp($path_cmp, $root_cmp, $root_len) !== 0) {
         throw new InvalidArgumentException('Path is not within project root');
     }
 
     // Boundary check: next char must be empty or a separator
-    $nextChar = substr($pathCmp, $rootLen, 1);
-    if ($nextChar !== '' && $nextChar !== $ds) {
+    $next_char = substr($path_cmp, $root_len, 1);
+    if ($next_char !== '' && $next_char !== $ds) {
         throw new InvalidArgumentException('Path is not within project root');
     }
 
     // Strip project root prefix and leading separator
-    $rel = substr($pathNorm, $rootLen);
+    $rel = substr($path_norm, $root_len);
     $rel = ltrim($rel, $ds);
 
     // If somehow empty, treat as project root

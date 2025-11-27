@@ -44,6 +44,7 @@ $env_name = match (true) {
 # humanized string
 define('SERVER_TYPE', $env_name.(IS_CRON ? '-Cron' : ''));
 
+
 /**
  * SYSTEM PATHS & URLs
  */
@@ -107,7 +108,7 @@ else $_SESSION = array();
 
 # Logging
 
-$ERR_NAMES = array(
+define('_ERR_NAMES', array(
     E_ERROR => 'Fatal run-time error',                 # 1
     E_WARNING => 'Run-time warning',                   # 2
     E_PARSE => 'Compile-time parse error',             # 4
@@ -123,7 +124,7 @@ $ERR_NAMES = array(
     E_RECOVERABLE_ERROR => 'Catchable fatal error',    # 4096
     E_DEPRECATED => 'Deprecated warning',              # 8192
     E_USER_DEPRECATED => 'User-generated deprecated notice', # 16384
-);
+));
 
 ini_set('display_errors', IS_PROD ? 0 : 1);
 ini_set('display_startup_errors', IS_PROD ? 0 : 1);
@@ -134,9 +135,8 @@ ini_set('log_errors', 1);
 set_error_handler('error_handler');
 function error_handler($err_no, $err_str, $err_file, $err_line)
 {
-    global $ERR_NAMES;
     if (!(error_reporting() & $err_no)) return;
-    $err_name = $ERR_NAMES[$err_no] ?? 'Unknown error';
+    $err_name = _ERR_NAMES[$err_no] ?? 'Unknown error';
     $err_text = "$err_name: $err_str in $err_file on line $err_line";
     $err_html = "<b>$err_name</b>: $err_str in <b>$err_file</b> on line <b>$err_line</b><br>\n";
     if (ini_get('log_errors')) { error_log($err_text); }
