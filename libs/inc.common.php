@@ -89,7 +89,7 @@ function reload()
 }
 
 
-function abspath_to_rel(string $path, string $proj_root): string
+function abs_to_rel(string $path, string $root=PROJ_ROOT): string
 {
     $ds = DIRECTORY_SEPARATOR;
 
@@ -116,7 +116,7 @@ function abspath_to_rel(string $path, string $proj_root): string
     };
 
     $pathNorm = $normalize($path);
-    $rootNorm = $normalize($proj_root);
+    $rootNorm = $normalize($root);
 
     // If path is exactly the project root, return a single separator
     if ($pathNorm === $rootNorm) {
@@ -137,7 +137,7 @@ function abspath_to_rel(string $path, string $proj_root): string
 
     $rootLen = strlen($rootCmp);
 
-    // Safety check: ensure $path is within $proj_root
+    // Safety check: ensure $path is within $root
     if (strncmp($pathCmp, $rootCmp, $rootLen) !== 0) {
         throw new InvalidArgumentException('Path is not within project root');
     }

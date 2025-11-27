@@ -57,7 +57,7 @@ function _assert($value, ...$args)
     $line = $frame['line'] ?? 0;
     $func = $frame['function'] ?? '{global}';
 
-    $path_rel = abspath_to_rel($file, PROJ_ROOT);
+    $path_rel = abs_to_rel($file, PROJ_ROOT);
 
     # extra info
     $vdmp_raw = '';
@@ -183,7 +183,7 @@ function launch_tests($path, $_top_call=true)
 
         $_CORE_TEST_STATS['files']++;
 
-        $path_rel = abspath_to_rel($path, PROJ_ROOT);
+        $path_rel = abs_to_rel($path, PROJ_ROOT);
         print "<hr>\n";
         print "<h2>Test module: <b>$path_rel</b></h2>\n";
 
