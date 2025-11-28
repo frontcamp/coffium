@@ -118,9 +118,24 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><td>COM_INF_FNAME</td><td><?=COM_INF_FNAME?></td></tr>
         <tr><td>DEF_API_FNAME</td><td><?=DEF_API_FNAME?></td></tr>
 
-        <tr><th colspan="2"><h2>Files</h2></th></tr>
-        <tr><td>Included</td><td>
-<? foreach($SYS['included'] as $file_path): ?>
+        <tr><th colspan="2"><h2>Stacked Data</h2></th></tr>
+        <tr><td>$SYS['included']</td><td>
+<? foreach(($SYS['included'] ?? array()) as $file_path): ?>
+            <span><?=$file_path?></span><br>
+<? endforeach ?>
+        </td></tr>
+        <tr><td>$SYS['ini.loaded']</td><td>
+<? foreach(($SYS['ini.loaded'] ?? array()) as $file_path): ?>
+            <span><?=$file_path?></span><br>
+<? endforeach ?>
+        </td></tr>
+        <tr><td>$SYS['hdl.preload.css']</td><td>
+<? foreach(($SYS['hdl.preload.css'] ?? array()) as $file_path): ?>
+            <span><?=$file_path?></span><br>
+<? endforeach ?>
+        </td></tr>
+        <tr><td>$SYS['hdl.preload.js']</td><td>
+<? foreach(($SYS['hdl.preload.css'] ?? array()) as $file_path): ?>
             <span><?=$file_path?></span><br>
 <? endforeach ?>
         </td></tr>
