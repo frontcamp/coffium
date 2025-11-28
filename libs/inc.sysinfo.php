@@ -1,3 +1,7 @@
+<?php
+defined('INDEX') or die('Forbidden!');
+$GLOBALS['SYS']['included'][] = __FILE__;
+?>
 
 <table width="100%" cellpadding="4" cellspacing="0" border="1">
     <thead>
@@ -89,6 +93,41 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><td>IS_VIP</td><td><?=bool_to_yesno(IS_VIP)?></td></tr>
         <tr><td>VIP_MODE_KEY</td><td><?=VIP_MODE_KEY?></td></tr>
 
+        <tr><th colspan="2"><h2>Request</h2></th></tr>
+
+        <tr><td>IS_AJAX</td><td><?=bool_to_yesno(IS_AJAX)?></td></tr>
+<? foreach(sys('request') as $key => $value): ?>
+        <tr><td>$SYS['request']['<?=$key?>']</td><td><?=$value?></td></tr>
+<? endforeach ?>
+        <tr><td>$SYS['route.path_raw']</td><td><?=sys('route.path_raw')?></td></tr>
+        <tr><td>$SYS['route.path']</td><td><?=sys('route.path')?></td></tr>
+        <tr><td>$SYS['route.chunks_raw']</td><td>
+<? foreach(sys('route.chunks_raw') as $chunk): ?>
+        <?=$chunk?>,
+<? endforeach ?>
+        </td></tr>
+        <tr><td>$SYS['route.chunks']</td><td>
+<? foreach(sys('route.chunks') as $chunk): ?>
+        <?=$chunk?>,
+<? endforeach ?>
+        </td></tr>
+
+        <tr><th colspan="2"><h2>COM API</h2></th></tr>
+
+        <tr><td>COM_INI_FNAME</td><td><?=COM_INI_FNAME?></td></tr>
+        <tr><td>COM_INF_FNAME</td><td><?=COM_INF_FNAME?></td></tr>
+        <tr><td>DEF_API_FNAME</td><td><?=DEF_API_FNAME?></td></tr>
+
+        <tr><th colspan="2"><h2>Files</h2></th></tr>
+
+<?php
+$included = '';
+foreach($SYS['included'] as $file_path) {
+    $included .= $file_path."<br>\n";
+}
+?>
+
+        <tr><td>Included</td><td><?=$included?></td></tr>
     </tbody>
 </table>
 
