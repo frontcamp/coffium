@@ -219,7 +219,7 @@ function _hdl_to_str(int $flags): string
  * @param string $lng_path Absolute path to language directory.
  * @return void
  */
-function core_load_translations($lng_path)
+function core_load_translations(string $lng_path): void
 {
     global $DICTIONARY;
     if (!isset($DICTIONARY)) $DICTIONARY = array();  # init
@@ -248,11 +248,13 @@ function core_load_translations($lng_path)
  * @param string      $suffix Optional extension (e.g. "php").
  * @return string Absolute (or route-relative) path.
  */
-function _route_mk_path(string $root = NULL,
-                       string $path = '',
-                       string $name = '',
-                       string $prefix = '',
-                       string $suffix = '')
+function _route_mk_path(
+            ?string $root = null,
+            string $path = '',
+            string $name = '',
+            string $prefix = '',
+            string $suffix = ''
+         ): string
 {
     global $_ROUTE_ROOT;
     if (is_null($root)) $root = $_ROUTE_ROOT;
@@ -271,7 +273,7 @@ function _route_mk_path(string $root = NULL,
  * @param string $path Raw handler path.
  * @return string Normalized path starting with "/" or empty string.
  */
-function _route_std_path(string $path)
+function _route_std_path(string $path): string
 {
     $dtos = str_replace('.', '/', $path);  # replace "." to "/"
 
@@ -299,7 +301,7 @@ function _route_std_path(string $path)
  * @param string $target_path Component alias or handler path.
  * @return void
  */
-function core_use_api($target_path)
+function core_use_api(string $target_path): void
 {
     global $_ROUTE_ROOT;
     $target_path = _route_std_path($target_path);
@@ -483,7 +485,13 @@ function core_use_handler(
                 # Launch ACT & TPL files inside a separate namespace, but they
                 # both still have an access to a single and outer context!
                 # At the same time we hides the handler from this function namespace.
-                (function ($handler_found, $act_path, $tpl_path, &$CONTEXT, &$handler_return)
+                (function (
+                        int $handler_found,
+                     string $act_path,
+                     string $tpl_path,
+                      array &$CONTEXT,
+                    ?string &$handler_return
+                 ): void
                 {
                     $enable_buffer = $CONTEXT['CORE_ENABLE_BUFFER'] ?? false;  # enable buffering
                     unset($CONTEXT['CORE_ENABLE_BUFFER']);
