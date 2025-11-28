@@ -3,10 +3,12 @@ defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 /* Request parser API */
 
-# Request type
+## Request type
+
 define('IS_AJAX', array_key_exists('ajax', $_REQUEST));
 
-# Server
+## Server
+
 $f_ssl = (($_SERVER['HTTPS'] ?? 'off') === 'on')
        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https');
 
@@ -15,7 +17,7 @@ $scheme = $f_ssl ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? 'localhost');
 $port = (string)($_SERVER['SERVER_PORT'] ?? '');
 
-// strip port from HTTP_HOST if present (IPv4 / hostname only)
+# strip port from HTTP_HOST if present (IPv4 / hostname only)
 if (strpos($host, ':') !== false && $host[0] !== '[') {
     [$host_name, $host_port] = explode(':', $host, 2);
     if ($port === '' && ctype_digit($host_port)) {
@@ -46,19 +48,22 @@ if ($query !== '') $query = '?'.$query;  # add ? to non empty query
 sys_opt('request', 'query_raw', $query);
 sys_opt('request', 'query_str', $query_raw);
 
-# Common
+## Common
+
 sys_opt('request', 'root', $root);
 sys_opt('request', 'path', rtrim(strtok($uri, '?'), '/\\'));
 sys_opt('request', 'orig', $root.sys_opt('request', 'uri'));
 sys_opt('request', 'base', $root.sys_opt('request', 'path'));
 
-# Route
+## Route
+
 sys('route.path_raw', route_path_cleanse(sys_opt('request', 'path'))); # original route path
 sys('route.path', sys('route.path_raw'));                              # working route path
 sys('route.chunks_raw', route_path_parse(sys('route.path')));          # original route chunks
 sys('route.chunks', sys('route.chunks_raw'));                          # working route chunks
 
-# Multilingual URL support
+## Multilingual URL support
+
 if (ML_URL_SUPPORT)
 {
     $chunks = sys('route.chunks');
@@ -72,11 +77,24 @@ if (ML_URL_SUPPORT)
     }
 }
 
-
-function route_path_cleanse(string $url_path,
-                           bool $auto_add_leading_slash=true,
-                           bool $empty_path_slashed=false,
-                           bool $add_ending_slash=false)
+/**
+ * Normalize raw URL path into an internal route path.
+ *
+ * The function removes query string, disallows dots and extensions, trims
+ * extra slashes and optionally enforces leading/trailing slash semantics.
+ *
+ * @param string $url_path               Raw URL path from the request.
+ * @param bool   $auto_add_leading_slash Prepend "/" when the path does not start with it.
+ * @param bool   $empty_path_slashed     Replace empty path with a single "/".
+ * @param bool   $add_ending_slash       Append "/" to non-empty paths.
+ * @return string Normalized route path.
+ */
+function route_path_cleanse(
+            string $url_path,
+            bool $auto_add_leading_slash=true,
+            bool $empty_path_slashed=false,
+            bool $add_ending_slash=false
+         ): string
 {
     if (!empty($url_path)                # if not empty
     && !str_starts_with($url_path, '/')  # .. and not started with slash
@@ -108,14 +126,22 @@ function route_path_cleanse(string $url_path,
     return $url_path;
 }
 
-
-# Parse incoming request into chunks
-function route_path_parse(string $url_clean_path)
+/**
+ * Split normalized URL path into non-empty segments.
+ *
+ * @param string $url_clean_path Normalized URL path without query string or extension.
+ * @return string[] Zero-based list of path segments.
+ */
+function route_path_parse(string $url_clean_path): array
 {
     $chunks = explode('/', $url_clean_path);
-    $chunks = array_filter($chunks, static function ($v) {
-        return $v !== '';
-    });
+    $chunks = array_filter(
+        $chunks,
+        static function (string $segment): bool {
+            return $segment !== '';
+        }
+    );
+
     return array_values($chunks);
 }
 

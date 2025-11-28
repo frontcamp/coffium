@@ -122,6 +122,7 @@ function sys(int|string $key, mixed $val = P_NULL): mixed
         return sys_get($key);
     } else {                   # set
         sys_add($key, $val);
+        return P_NULL;
     }
 }
 
@@ -271,6 +272,7 @@ function sys_opt(
         return sys_opt_get($opt, $key);
     } else {
         sys_opt_add($opt, $key, $val);
+        return P_NULL;
     }
 }
 
