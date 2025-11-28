@@ -4,110 +4,285 @@ $GLOBALS['SYS']['included'][] = __FILE__;
 /* Common functionality */
 
 
-function bool_to_int($v) { return $v === true ? 1 : 0; }
-function int_to_bool($v) { return $v >= 1 ? true : false; }
+/**
+ * Convert a boolean value to integer representation (1 or 0).
+ *
+ * @param bool $value Source boolean value.
+ * @return int 1 for true, 0 for false.
+ */
+function bool_to_int(bool $value): int
+{
+    return $value ? 1 : 0;
+}
 
-function bool_to_onoff($v) { return $v === true ? 'On' : 'Off'; }
-function bool_to_yesno($v) { return $v === true ? 'Yes' : 'No'; }
+/**
+ * Convert an integer flag (>=1) to boolean.
+ *
+ * @param int $value Integer flag.
+ * @return bool True if value is greater or equal to 1.
+ */
+function int_to_bool(int $value): bool
+{
+    return $value >= 1;
+}
 
-function some_to_onoff($v) { return $v == true ? 'On' : 'Off'; }
-function some_to_yesno($v) { return $v == true ? 'Yes' : 'No'; }
+/**
+ * Convert a strict boolean to "On"/"Off".
+ *
+ * @param bool $value Source boolean value.
+ * @return string "On" for true, "Off" for false.
+ */
+function bool_to_onoff(bool $value): string
+{
+    return $value ? 'On' : 'Off';
+}
 
+/**
+ * Convert a strict boolean to "Yes"/"No".
+ *
+ * @param bool $value Source boolean value.
+ * @return string "Yes" for true, "No" for false.
+ */
+function bool_to_yesno(bool $value): string
+{
+    return $value ? 'Yes' : 'No';
+}
 
-// Returns a new empty array *by reference*
-// so it can be passed to functions expecting `array &...` parameters.
-function &empty_array() { $a = array(); return $a; }
+/**
+ * Convert a loosely-typed value to "On"/"Off" using PHP loose comparison rules.
+ *
+ * @param mixed $value Any value that can be treated as boolean-like.
+ * @return string "On" if $value == true, "Off" otherwise.
+ */
+function some_to_onoff(mixed $value): string
+{
+    return ($value == true) ? 'On' : 'Off';
+}
 
+/**
+ * Convert a loosely-typed value to "Yes"/"No" using PHP loose comparison rules.
+ *
+ * @param mixed $value Any value that can be treated as boolean-like.
+ * @return string "Yes" if $value == true, "No" otherwise.
+ */
+function some_to_yesno(mixed $value): string
+{
+    return ($value == true) ? 'Yes' : 'No';
+}
 
-function file_get_data($file_path, $var_name='DATA')
+/**
+ * Return a new empty array by reference.
+ *
+ * Useful for passing to APIs that expect parameters by reference (array &...).
+ *
+ * @return array Empty array (returned by reference).
+ */
+function &empty_array(): array
+{
+    $a = array();
+    return $a;
+}
+
+/**
+ * Load a variable from a PHP data file.
+ *
+ * The included file is expected to define a variable with the given name.
+ *
+ * @param string $file_path Absolute or relative path to the data file.
+ * @param string $var_name  Variable name to read from the file.
+ * @return mixed Value of the requested variable.
+ */
+function file_get_data(
+            string $file_path,
+            string $var_name = 'DATA'
+         ): mixed
 {
     if (!is_file($file_path))
     {
         trigger_error('Data file does not exist: '.$file_path, E_USER_ERROR);
         die();
     }
-    include($file_path);
+
+    include $file_path;
+
     if (!isset($$var_name))
     {
         trigger_error('Data variable is absent: '.$var_name, E_USER_ERROR);
         die();
     }
+
     return $$var_name;
 }
 
-
-function file_put_data($file_path, $data, $var_name='DATA')
+/**
+ * Store a variable into a PHP data file.
+ *
+ * The file will contain a PHP variable assignment that can be loaded via file_get_data().
+ *
+ * @param string $file_path Absolute or relative path to the target file.
+ * @param mixed  $data      Data to export.
+ * @param string $var_name  Variable name to use inside the file.
+ * @return void
+ */
+function file_put_data(
+            string $file_path,
+             mixed $data,
+            string $var_name = 'DATA'
+         ): void
 {
     $s = "<?php\n\n$".$var_name.' = '.var_export($data, true).";\n\n";
     file_put_contents($file_path, $s, LOCK_EX);
 }
 
-
-function is_float_or_int($value) { return (is_float($value) || is_int($value)); }
-function is_int_or_float($value) { return (is_int($value) || is_float($value)); }
-
-function is_decimal(string $value) { return (false !== strpos($value, '.')); }
-
-
-/* Return true if the value is an integer or a string representing an integer, false otherwise */
-function is_int_like($value)
+/**
+ * Check whether a value is a float or an integer.
+ *
+ * @param mixed $value Value to check.
+ * @return bool True for float or int, false otherwise.
+ */
+function is_float_or_int(mixed $value): bool
 {
-    if (is_int($value)) return true;
-    if (!is_string($value)) return false;
-    $morp = str_starts_with($value, '-')
-         || str_starts_with($value, '+');
-    return $morp ? ctype_digit(substr($value, 1)) : ctype_digit($value);
+    return is_float($value) || is_int($value);
 }
 
+/**
+ * Check whether a value is an integer or a float.
+ *
+ * Alias of is_float_or_int() with reversed wording.
+ *
+ * @param mixed $value Value to check.
+ * @return bool True for int or float, false otherwise.
+ */
+function is_int_or_float(mixed $value): bool
+{
+    return is_int($value) || is_float($value);
+}
 
-/* Trim number to a specific range of values */
-function ntrim($value, $min, $max)
+/**
+ * Check if a string contains a decimal point.
+ *
+ * @param string $value String representation of a number.
+ * @return bool True if the string contains a dot, false otherwise.
+ */
+function is_decimal(string $value): bool
+{
+    return (false !== strpos($value, '.'));
+}
+
+/**
+ * Check whether a value is an integer or a sign-prefixed integer string.
+ *
+ * Examples of values returning true: 123, "123", "-5", "+42"
+ *
+ * @param int|string $value Integer or string to inspect.
+ * @return bool True if $value represents an integer, false otherwise.
+ */
+function is_int_like(int|string $value): bool
+{
+    if (is_int($value)) return true;
+
+    $str = (string) $value;
+
+    $has_sign = str_starts_with($str, '-')
+             || str_starts_with($str, '+');
+
+    return $has_sign
+        ? ctype_digit(substr($str, 1))
+        : ctype_digit($str);
+}
+
+/**
+ * Clamp numeric value to the given [min, max] range.
+ *
+ * @param int|float $value Value to clamp.
+ * @param int|float $min   Lower bound.
+ * @param int|float $max   Upper bound.
+ * @return int|float Clamped value.
+ */
+function ntrim(
+            int|float $value,
+            int|float $min,
+            int|float $max
+         ): int|float
 {
     if ($value < $min) $value = $min;
     if ($value > $max) $value = $max;
     return $value;
 }
 
-
-function redirect($location, $status=302, $x_redirect_by=CORE_NAME)
+/**
+ * Perform an HTTP redirect (or JS fallback) and terminate execution.
+ *
+ * @param string             $location     Target URL.
+ * @param int                $status       HTTP status code (must be 3xx).
+ * @param string|false|null  $x_redirect_by Optional value for X-Redirect-By header;
+ *                                          pass false to skip the header.
+ * @return void
+ */
+function redirect(
+            string $location,
+            int $status = 302,
+            string|false|null $x_redirect_by = CORE_NAME
+         ): void
 {
-    if (!is_int($status) || $status < 300 || $status > 399) {
-        trigger_error('HTTP redirect status code must be a redirection code, 3xx.', E_USER_ERROR);
+    if ($status < 300 || $status > 399) {
+        trigger_error(
+            'HTTP redirect status code must be a redirection code, 3xx.',
+            E_USER_ERROR
+        );
     } elseif (!headers_sent()) {  # HTTP redirection
-        if (is_string($x_redirect_by)) header('X-Redirect-By: '.$x_redirect_by);
+        if (is_string($x_redirect_by)) {
+            header('X-Redirect-By: '.$x_redirect_by);
+        }
         header('Location: '.$location, true, $status);
     } else {  # JS redirection
         echo "<script type='text/JavaScript'>document.location.href='$location';</script>\n";
     }
+
     die('<a href="'.$location.'">Please click here if you are not redirected within a few seconds.</a>');
 }
 
-
-function reload()
+/**
+ * Reload current page via redirect.
+ *
+ * @return void
+ */
+function reload(): void
 {
     redirect('?');
 }
 
-
+/**
+ * Convert absolute filesystem path to a project-relative path.
+ *
+ * Both $path and $root may use "/" or "\" separators; they are normalized internally.
+ * If $path is not located inside $root, an InvalidArgumentException is thrown.
+ *
+ * @param string $path Absolute path to convert.
+ * @param string $root Project root (default: PROJ_ROOT).
+ * @return string Relative path with normalized directory separators.
+ *
+ * @throws InvalidArgumentException When $path is not within $root.
+ */
 function abs_to_rel(string $path, string $root=PROJ_ROOT): string
 {
     $ds = DIRECTORY_SEPARATOR;
 
     $normalize = static function (string $p) use ($ds): string {
-        // Normalize all separators to the current OS
+        # normalize all separators to the current OS
         $p = str_replace(['/', '\\'], $ds, $p);
 
-        // Collapse duplicate separators (e.g. "//" -> "/")
+        # collapse duplicate separators (e.g. "//" -> "/")
         $p = preg_replace('~' . preg_quote($ds, '~') . '+~', $ds, $p);
 
-        // On Windows, keep pure drive roots like "C:\"
+        # on Windows, keep pure drive roots like "C:\"
         if ($ds === '\\') {
             if (preg_match('~^[A-Za-z]:\\\\$~', $p)) {
                 return strtoupper($p);
             }
         }
 
-        // Trim trailing separator except for root ("/" or "C:\")
+        # trim trailing separator except for root ("/" or "C:\")
         if (strlen($p) > 1) {
             $p = rtrim($p, $ds);
         }
@@ -118,12 +293,12 @@ function abs_to_rel(string $path, string $root=PROJ_ROOT): string
     $path_norm = $normalize($path);
     $root_norm = $normalize($root);
 
-    // If path is exactly the project root, return a single separator
+    # if path is exactly the project root, return a single separator
     if ($path_norm === $root_norm) {
         return $ds;
     }
 
-    // Special case: project root is filesystem root ("/" on Unix)
+    # special case: project root is filesystem root ("/" on Unix)
     if ($root_norm === $ds) {
         $rel = ltrim($path_norm, $ds);
         return $rel === '' ? $ds : $rel;
@@ -131,58 +306,74 @@ function abs_to_rel(string $path, string $root=PROJ_ROOT): string
 
     $isWindows = ($ds === '\\');
 
-    // Case-insensitive comparison on Windows, case-sensitive on Unix
+    # case-insensitive comparison on Windows, case-sensitive on Unix
     $path_cmp = $isWindows ? strtolower($path_norm) : $path_norm;
     $root_cmp = $isWindows ? strtolower($root_norm) : $root_norm;
 
     $root_len = strlen($root_cmp);
 
-    // Safety check: ensure $path is within $root
+    # safety check: ensure $path is within $root
     if (strncmp($path_cmp, $root_cmp, $root_len) !== 0) {
         throw new InvalidArgumentException('Path is not within project root');
     }
 
-    // Boundary check: next char must be empty or a separator
+    # boundary check: next char must be empty or a separator
     $next_char = substr($path_cmp, $root_len, 1);
     if ($next_char !== '' && $next_char !== $ds) {
         throw new InvalidArgumentException('Path is not within project root');
     }
 
-    // Strip project root prefix and leading separator
+    # strip project root prefix and leading separator
     $rel = substr($path_norm, $root_len);
     $rel = ltrim($rel, $ds);
 
-    // If somehow empty, treat as project root
+    # if somehow empty, treat as project root
     return $rel === '' ? $ds : $rel;
 }
 
 
-function rmtree($path)
+/**
+ * Recursively remove a directory tree.
+ *
+ * Silently returns if the path is not a directory or cannot be opened.
+ *
+ * @param string $path Directory path to remove.
+ * @return void
+ */
+function rmtree(string $path): void
 {
     if (!is_dir($path)) return;
-    $d = @opendir($path);
-    if ($d === false) return;  # handle error
-    while (false !== ($name = readdir($d)))
+
+    $dir = @opendir($path);
+    if ($dir === false) return;  # unable to open directory
+
+    while (false !== ($name = readdir($dir)))
     {
-        if (($name != '.') && ($name != '..'))
-        {
-            $p = $path.'/'.$name;
-            if (is_dir($p)) rmtree($p); else unlink($p);
+        if ($name === '.' || $name === '..') continue;
+        $entry = $path.'/'.$name;
+        if (is_dir($entry)) {
+            rmtree($entry);
+        } elseif (is_file($entry)) {
+            @unlink($entry);
         }
     }
-    closedir($d);
-    rmdir($path);
+    closedir($dir);
+    @rmdir($path);
 }
 
-
 /**
- * List files and directories inside the specified path
+ * List files and directories inside the specified path.
+ *
  * This function:
- * + removes "." and ".."
- * + sorts folders first
- * + applies natsort to folder and file names
+ *  - removes "." and ".."
+ *  - normalizes directory separators
+ *  - sorts folders first
+ *  - applies natsort() to folder and file names separately
+ *
+ * @param string $path Path to scan.
+ * @return string[] Sorted list of items (folders first, then files).
  */
-function scandir_advanced($path)
+function scandir_advanced(string $path): array
 {
     $path = str_replace('\\', '/', $path);  # fix Windows dir separators
     $path = rtrim($path, '/\\');            # remove ending slash
@@ -193,51 +384,56 @@ function scandir_advanced($path)
         return array();
     }
 
-    $files = scandir($path, SCANDIR_SORT_ASCENDING);
+    $folder_items = scandir($path, SCANDIR_SORT_ASCENDING);
 
-    $just_folders = array();
-    $just_files = array();
-    foreach ($files as $fname)
+    $folders = array();
+    $files = array();
+
+    foreach ($folder_items as $name)
     {
-        if ($fname == '.' || $fname == '..') continue;
-        $abs_path = $path.'/'.$fname;
-        if (is_dir($abs_path)) array_push($just_folders, $fname);
-        if (is_file($abs_path)) array_push($just_files, $fname);
+        if ($name === '.' || $name === '..') continue;
+        $abs_path = $path.'/'.$name;
+        if (is_dir($abs_path)) {
+            $folders[] = $name;
+        } elseif (is_file($abs_path)) {
+            $files[] = $name;
+        }
     }
-    natsort($just_folders);
-    natsort($just_files);
 
-    return array_merge($just_folders, $just_files);
+    natsort($folders);
+    natsort($files);
+
+    return array_merge($folders, $files);
 }
 
-function get_client_ip()
+/**
+ * Get client IP address from server variables.
+ *
+ * NOTE: This function does not validate or filter the value,
+ *       it only returns the raw header content.
+ *
+ * @return string Detected client IP address or "0.0.0.0" as a fallback.
+ */
+function get_client_ip(): string
 {
-    if (isset($_SERVER['HTTP_CLIENT_IP'])
-     && filter_var($_SERVER['HTTP_CLIENT_IP'], FILTER_VALIDATE_IP))
+    if (isset($_SERVER['HTTP_CLIENT_IP']))
     {
-        return $_SERVER['HTTP_CLIENT_IP'];
+        return (string) $_SERVER['HTTP_CLIENT_IP'];
     }
 
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
     {
-        // split addresses and get 1st
-        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        foreach ($ips as $ip_address)
-        {
-            $ip_address = trim($ip_address); // remove spaces
-            if (filter_var($ip_address, FILTER_VALIDATE_IP))
-            {
-                return $ip_address;
-            }
-        }
+        # in case of multiple addresses, return the first one.
+        $raw = (string) $_SERVER['HTTP_X_FORWARDED_FOR'];
+        $parts = explode(',', $raw);
+        return trim($parts[0]);
     }
 
-    if (isset($_SERVER['REMOTE_ADDR'])
-     && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP))
+    if (isset($_SERVER['REMOTE_ADDR']))
     {
-        return $_SERVER['REMOTE_ADDR'];
+        return (string) $_SERVER['REMOTE_ADDR'];
     }
 
-    return '';
+    return '0.0.0.0';
 }
 

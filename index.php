@@ -2,26 +2,27 @@
 define('INDEX', true);
 $GLOBALS['SYS']['included'][] = __FILE__;
 $GLOBALS['SYS']['runtime'] = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
+/* Coffium core entry point */
 
-# Check PHP version
+## Check PHP version
 
 if (version_compare(PHP_VERSION, '8.0.0', '<'))
 {
     die('Required PHP version 8.0.0 or higher! Current: '.PHP_VERSION);
 }
 
-# Define core ID
+## Define core ID
 
 define('FRAMEWORK', 'Coffium');
 define('CORE_NAME', 'White Tiger');
 define('CORE_VERSION', '0.5');
 
-# Define core response statuses
+## Define core response statuses
 
 define('CORE_STATUS_OK',         0);
 define('CORE_STATUS_TERMINATED', 1);
 
-# Define finalizer priorities
+## Define finalizer priorities
 
 define('CORE_PRIO_LOW',     -5);  # data processing, pre-finalization
 define('CORE_PRIO_NORMAL',   0);  # routine finalizations, by default
@@ -35,13 +36,13 @@ function core_register_finalizer(callable $func_name, int $priority=CORE_PRIO_NO
     $_FINALIZERS[$priority][] = $func_name;
 }
 
-# Initialization
+## Initialization
 
 require('cfg.global.php');
 require('cfg.server.php');
 require('cfg.custom.php');
 
-# Error handling
+## Error handling
 
 define('_ERR_NAMES', array(
     E_ERROR => 'Fatal run-time error',                 # 1
@@ -75,18 +76,18 @@ function error_handler($err_no, $err_str, $err_file, $err_line)
 
 set_error_handler('error_handler');
 
-# Debug features
+## Debug features
 
 if (IS_VIP) require('libs/inc.dump.php');
 
-# Include core libraries
+## Include core libraries
 
 require('libs/inc.common.php');
 require('libs/inc.registry.php');
 require('libs/inc.request.php');
 require('libs/inc.response.php');
 
-# Request processing
+## Request processing
 
 try
 {
@@ -132,7 +133,7 @@ catch (CoreTerminateRoute $e)
     }
 }
 
-# Run finalizers (allow registration during execution)
+## Run finalizers (allow registration during execution)
 
 if (IS_VIP) $_FINALIZERS_SNAPSHOT = $_FINALIZERS;  # debug
 while (!empty($_FINALIZERS))
@@ -147,7 +148,7 @@ while (!empty($_FINALIZERS))
     unset($_FINALIZERS[$prio_group]);
 }
 
-# Run debug helpers
+## Run debug helpers
 
 if (IS_VIP) require('libs/inc.helpers.php');
 

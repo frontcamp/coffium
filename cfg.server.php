@@ -1,12 +1,14 @@
 <?php
 defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
+/* Environment-dependent configuration */
 
 
-##
-## SERVER-DEPENDENT CONFIGURATION
-## (environment-specific DB and other settings)
-##
+/**
+ * SERVER-DEPENDENT CONFIGURATION
+ * ------------------------------
+ * (environment-specific DB and other settings)
+ */
 
 # TODO: override DB_* per environment
 # or add more environmental constants
