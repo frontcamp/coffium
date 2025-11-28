@@ -35,6 +35,7 @@ function _test_stats_print()
 
     $passed = $_TEST_STATS['asserts'] - $_TEST_STATS['failed'];
 
+    print "<hr>\n";
     print '<p class="summary"><b>Summary</b>:'
          .' files: <b>'.$_TEST_STATS['files'].'</b>,'
          .' functions: <b>'.$_TEST_STATS['functions'].'</b>,'
@@ -106,6 +107,7 @@ function core_assert($v) { return _assert($v == true, $v); }
 function core_assert_true($v) { return _assert($v === true, $v); }
 function core_assert_false($v) { return _assert($v === false, $v); }
 function core_assert_empty($v) { return _assert(empty($v), $v); }
+function core_assert_not_empty($v) { return _assert(!empty($v), $v); }
 function core_assert_zero($v) { return _assert($v === 0, $v); }
 function core_assert_null($v) { return _assert(is_null($v), $v); }
 function core_assert_pnull($v) { return _assert(is_pnull($v), $v); }

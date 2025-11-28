@@ -3,9 +3,9 @@ defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 
 
-/**
- * Custom project settings
- */
+##
+## PROJECT SETTINGS
+##
 
 // Example project-specific settings:
 // define('APP_FEATURE_X_ENABLED', false);

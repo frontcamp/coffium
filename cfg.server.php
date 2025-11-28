@@ -3,13 +3,13 @@ defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 
 
-/**
- * Server-dependent configuration
- * (environment-specific DB and other settings)
- *
- * TODO: override DB_* per environment
- * or add more environmental constants
- */
+##
+## SERVER-DEPENDENT CONFIGURATION
+## (environment-specific DB and other settings)
+##
+
+# TODO: override DB_* per environment
+# or add more environmental constants
 
 if (IS_LOCAL)  # local server
 {

@@ -52,7 +52,7 @@
         <tr><td>session.use_strict_mode</td><td><?=some_to_onoff(ini_get('session.use_strict_mode'))?></td></tr>
         <tr><td>session.cookie_httponly</td><td><?=some_to_onoff(ini_get('session.cookie_httponly'))?></td></tr>
         <tr><td>session.cookie_secure</td><td><?=some_to_onoff(ini_get('session.cookie_secure'))?></td></tr>
-        <tr><td>PHP_SESSION_LIFETIME</td><td><?=PHP_SESSION_LIFETIME?></td></tr>
+        <tr><td>INI_SESSION_LIFETIME</td><td><?=INI_SESSION_LIFETIME?></td></tr>
         <tr><td>session.auto_start</td><td><?=some_to_onoff(ini_get('session.auto_start'))?></td></tr>
         <tr><td>session.cookie_lifetime</td><td><?=ini_get('session.cookie_lifetime')?></td></tr>
         <tr><td>session.use_cookies</td><td><?=some_to_onoff(ini_get('session.use_cookies'))?></td></tr>
@@ -61,6 +61,7 @@
 
         <tr><th colspan="2"><h3>Logging</h3></th></tr>
 
+        <tr><td>INI_LOG_FILE</td><td><?=INI_LOG_FILE?></td></tr>
         <tr><td>display_errors</td><td><?=some_to_onoff(ini_get('display_errors'))?></td></tr>
         <tr><td>display_startup_errors</td><td><?=some_to_onoff(ini_get('display_startup_errors'))?></td></tr>
         <tr><td>error_log</td><td><?=ini_get('error_log')?></td></tr>
@@ -75,6 +76,8 @@ $cttype = $header ? array_values($header)[0] : '(not set)';
 $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
 ?>
 
+        <tr><td>INI_ENCODING</td><td><?=INI_ENCODING?></td></tr>
+        <tr><td>INI_LANGUAGE</td><td><?=INI_LANGUAGE?></td></tr>
         <tr><td>Content-Type</td><td><?=$CONTENT_TYPE?></td></tr>
         <tr><td>mb_internal_encoding()</td><td><?=mb_internal_encoding()?></td></tr>
         <tr><td>mb_http_output()</td><td><?=mb_http_output()?></td></tr>
