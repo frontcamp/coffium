@@ -103,12 +103,12 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><td>$SYS['route.path']</td><td><?=sys('route.path')?></td></tr>
         <tr><td>$SYS['route.chunks_raw']</td><td>
 <? foreach(sys('route.chunks_raw') as $chunk): ?>
-        <?=$chunk?>,
+            <span><?=$chunk?>,</span>
 <? endforeach ?>
         </td></tr>
         <tr><td>$SYS['route.chunks']</td><td>
 <? foreach(sys('route.chunks') as $chunk): ?>
-        <?=$chunk?>,
+            <span><?=$chunk?>,</span>
 <? endforeach ?>
         </td></tr>
 
@@ -119,15 +119,11 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><td>DEF_API_FNAME</td><td><?=DEF_API_FNAME?></td></tr>
 
         <tr><th colspan="2"><h2>Files</h2></th></tr>
-
-<?php
-$included = '';
-foreach($SYS['included'] as $file_path) {
-    $included .= $file_path."<br>\n";
-}
-?>
-
-        <tr><td>Included</td><td><?=$included?></td></tr>
+        <tr><td>Included</td><td>
+<? foreach($SYS['included'] as $file_path): ?>
+            <span><?=$file_path?></span><br>
+<? endforeach ?>
+        </td></tr>
     </tbody>
 </table>
 
