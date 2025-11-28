@@ -126,7 +126,7 @@ function file_get_data(
  */
 function file_put_data(
             string $file_path,
-             mixed $data,
+            mixed $data,
             string $var_name = 'DATA'
          ): void
 {
