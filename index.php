@@ -107,6 +107,8 @@ try
 }
 catch (CoreTerminateRoute $e)
 {
+    while (ob_get_level() > 0) ob_end_clean();  # clean output buffer
+
     $message = $e->getMessage();
 
     # set response status

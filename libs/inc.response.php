@@ -547,8 +547,8 @@ function core_use_handler(
     }
 
     # try to extract new name from given path
-    $new_name = substr($path, strrpos($path, '/') + 1);  # extract last dir name
-    $new_path = substr($path, 0, strlen($path) - strlen($new_name) - 1);  # cut path
+    $new_name = basename($path);  # extract last dir name
+    $new_path = dirname($path);   # cut path
 
     if (is_dir($_ROUTE_ROOT.$new_path))  # new path exists
     {
@@ -580,7 +580,7 @@ function core_use_handler(
 function core_route_path_to_url(string $handler_path): string
 {
     $path = _route_std_path($handler_path);
-    return sys_opt_get('request', 'root') . $path;
+    return sys_opt_get('request', 'root').$path;
 }
 
 #
