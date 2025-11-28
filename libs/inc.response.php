@@ -41,8 +41,11 @@ define('HDL_ASC_DEF', 64);  # ascent to top default on fail
 $_H_PRELOAD_CSS_INIT_POS = 0;  # hdl.preload.css initial sub-stack last position
 $_H_PRELOAD_JS_INIT_POS = 0;   # hdl.preload.js initial sub-stack last position
 
-#
-# Termination API
+
+/**
+ * TERMINATION API
+ * ---------------
+ */
 
 /**
  * Internal signal to immediately terminate current route processing.
@@ -55,6 +58,14 @@ class CoreTerminateRoute extends RuntimeException
     public ?int $redirect_status;
     public ?string $redirect_by;
 
+    /**
+     * @param string         $message         Human-readable reason of termination.
+     * @param int            $code            Optional internal error code.
+     * @param Throwable|null $previous        Chained previous exception.
+     * @param string|null    $redirect_url    Target URL for redirect, if any.
+     * @param int|null       $redirect_status HTTP status code for redirect.
+     * @param string|null    $redirect_by     Optional redirect source marker.
+     */
     public function __construct(string $message = 'Route terminated',
                                    int $code = 0,
                             ?Throwable $previous = null,
@@ -68,7 +79,12 @@ class CoreTerminateRoute extends RuntimeException
         $this->redirect_by     = $redirect_by;
     }
 
-    public function hasRedirect(): bool
+    /**
+     * Check whether this termination carries redirect data.
+     *
+     * @return bool True when redirect_url is not null.
+     */
+    public function has_redirect(): bool
     {
         return $this->redirect_url !== null;
     }
@@ -79,9 +95,12 @@ class CoreTerminateRoute extends RuntimeException
  *
  * Can be used in handlers, templates, APIs, etc.
  *
+ * @param string $message Reason of route termination (for diagnostics).
+ * @return void
+ *
  * @throws CoreTerminateRoute
  */
-function core_terminate_route(string $message = 'Route terminated')
+function core_terminate_route(string $message='Route terminated'): void
 {
     throw new CoreTerminateRoute($message);
 }
@@ -89,23 +108,39 @@ function core_terminate_route(string $message = 'Route terminated')
 /**
  * Emergency route termination with final redirect.
  *
+ * @param string      $location      Target URL.
+ * @param int         $status        HTTP redirect status code.
+ * @param string|null $x_redirect_by Optional redirect source marker.
+ * @param string      $message       Reason text for diagnostics.
+ * @return void
+ *
  * @throws CoreTerminateRoute
  */
-function core_terminate_and_redirect(string $location,
-                                        int $status = 302,
-                                    ?string $x_redirect_by = CORE_NAME,
-                                     string $message = 'Route terminated with redirect')
+function core_terminate_and_redirect(
+            string $location,
+            int $status = 302,
+            ?string $x_redirect_by = CORE_NAME,
+            string $message = 'Route terminated with redirect'
+         ): void
 {
     throw new CoreTerminateRoute($message, 0, null, $location, $status, $x_redirect_by);
 }
 
-#
-# Route ROOT API
+
+/**
+ * ROUTE ROOT API
+ * --------------
+ */
 
 $_ROUTE_ROOT = COMS_ROOT;
 $_ROUTE_ROOT_STACK = array();
 
-function restore_route_root()
+/**
+ * Restore previous route root from the internal stack.
+ *
+ * @return bool True on success, false when the stack is empty.
+ */
+function restore_route_root(): bool
 {
     global $_ROUTE_ROOT, $_ROUTE_ROOT_STACK;
     if (empty($_ROUTE_ROOT_STACK)) return false;
@@ -113,9 +148,24 @@ function restore_route_root()
     return true;
 }
 
-function get_route_root() { return $GLOBALS['_ROUTE_ROOT']; }
+/**
+ * Get current route root (components tree root).
+ *
+ * @return string Absolute path to current route root.
+ */
+function get_route_root(): string
+{
+    return $GLOBALS['_ROUTE_ROOT'];
+}
 
-function set_route_root($new_root=NULL, $auto_store=true)
+/**
+ * Set current route root and optionally store previous root.
+ *
+ * @param string|null $new_root   New absolute route root; null keeps current.
+ * @param bool        $auto_store When true, push previous root into stack.
+ * @return string Current route root after change.
+ */
+function set_route_root(?string $new_root = null, bool $auto_store = true): string
 {
     global $_ROUTE_ROOT, $_ROUTE_ROOT_STACK;
     if ($auto_store) array_push($_ROUTE_ROOT_STACK, $_ROUTE_ROOT);
@@ -123,17 +173,31 @@ function set_route_root($new_root=NULL, $auto_store=true)
     return $_ROUTE_ROOT;
 }
 
-function store_route_root()
+/**
+ * Push current route root into the internal stack without changing it.
+ *
+ * @return string Current route root.
+ */
+function store_route_root(): string
 {
     global $_ROUTE_ROOT, $_ROUTE_ROOT_STACK;
     array_push($_ROUTE_ROOT_STACK, $_ROUTE_ROOT);  # store current
     return $_ROUTE_ROOT;
 }
 
-#
-# Common
 
-function _hdl_to_str(int $flags)
+/**
+ * COMMON
+ * ------
+ */
+
+/**
+ * Represent handler flag bitmask as a human-readable string.
+ *
+ * @param int $flags Handler flags bitmask (HDL_*).
+ * @return string Printable representation like "<act|tpl>" or "<all>".
+ */
+function _hdl_to_str(int $flags): string
 {
     if ($flags === HDL_NONE) return '<none>';
 
@@ -147,6 +211,14 @@ function _hdl_to_str(int $flags)
     return '<'.trim($s, '|').'>';
 }
 
+/**
+ * Recursively load translation files from a given language directory.
+ *
+ * Each PHP file is expected to populate global $DICTIONARY.
+ *
+ * @param string $lng_path Absolute path to language directory.
+ * @return void
+ */
 function core_load_translations($lng_path)
 {
     global $DICTIONARY;
@@ -166,6 +238,16 @@ function core_load_translations($lng_path)
     }
 }
 
+/**
+ * Build filesystem path for component/handler element.
+ *
+ * @param string|null $root   Base directory (defaults to current route root).
+ * @param string      $path   Relative handler path ("comp.sub" or "/comp/sub").
+ * @param string      $name   File base name without prefix/suffix.
+ * @param string      $prefix Optional dot-separated prefix (e.g. "act").
+ * @param string      $suffix Optional extension (e.g. "php").
+ * @return string Absolute (or route-relative) path.
+ */
 function _route_mk_path(string $root = NULL,
                        string $path = '',
                        string $name = '',
@@ -180,10 +262,15 @@ function _route_mk_path(string $root = NULL,
     return $root.$path.'/'.$prefix.$name.$suffix;
 }
 
-# Router path standardization:
-# - must be of a string type
-# - convert from user-friendly to a system valid ('p1.p2.p3' => '/p1/p2/p3')
-# - avoid (remove) single slash to be concatenate-friendly
+/**
+ * Router path standardization.
+ *
+ * Converts dot-notation ('p1.p2.p3') into '/p1/p2/p3', truncates at the first
+ * "//" and returns either '' or a string starting with "/".
+ *
+ * @param string $path Raw handler path.
+ * @return string Normalized path starting with "/" or empty string.
+ */
 function _route_std_path(string $path)
 {
     $dtos = str_replace('.', '/', $path);  # replace "." to "/"
@@ -195,15 +282,22 @@ function _route_std_path(string $path)
     return ($result != '/') ? $result : '';
 }
 
-#
-# Routing API
+/**
+ * ROUTING API
+ * -----------
+ */
 
 
 /**
- * $target_path - component alias or path to handler
- *   component alias - routine component initialization & assign API
- *   path to handler - everything above plus handler tree processing
- *     (language file assign and every level initialization)
+ * Initialize component API and its dependencies.
+ *
+ * $target_path may be:
+ *  - component alias ("/component" or "component");
+ *  - full handler path ("component.sub.handler"), in this case
+ *    language and init files are processed along the path.
+ *
+ * @param string $target_path Component alias or handler path.
+ * @return void
  */
 function core_use_api($target_path)
 {
@@ -268,7 +362,7 @@ function core_use_api($target_path)
     }
 }
 
-# Hint: To skip passing $CONTEXT parameter, just use empty_array(), e.g.:
+# Hint: To skip passing $CONTEXT parameter, use empty_array(), e.g.:
 # core_use_handler('...', empty_array(), HDL_TPL|HDL_TRY_DEF|HDL_ASC_DEF);
 #
 # Note: empty_array() function defined in /libs/inc.common.php
@@ -289,11 +383,26 @@ function core_use_api($target_path)
 # IMPORTANT: always check result with strict comparison (=== false / === true)
 #            to distinguish boolean and string results.
 #
-function core_use_handler(string $path,
-                           array &$CONTEXT = array(),
-                             int $flags = HDL_ALL | HDL_ASC_DEF | HDL_TRY_DEF,
-                         ?string $_name = NULL,   # handler name (internal)
-                            bool $_n1st = false)  # native 1st occurrence (internal)
+
+/**
+ * Resolve and execute handler by path.
+ *
+ * @param string      $path    Handler path in dotted or slash notation.
+ * @param array       $CONTEXT Shared context passed by reference into handler scope.
+ * @param int         $flags   HDL_* flag bitmask controlling search and static preload.
+ * @param string|null $_name   Internal handler name override (do not use directly).
+ * @param bool        $_n1st   Internal flag marking first ascent attempt.
+ * @return bool|string False when handler not found,
+ *                     true when found but no buffered output returned,
+ *                     string when buffered output is returned.
+ */
+function core_use_handler(
+            string $path,
+             array &$CONTEXT = array(),
+               int $flags = HDL_ALL | HDL_ASC_DEF | HDL_TRY_DEF,
+           ?string $_name = null,  # handler name (internal)
+              bool $_n1st = false  # native 1st occurrence (internal)
+         ): bool|string
 {
     global $_H_PRELOAD_CSS_INIT_POS,
            $_H_PRELOAD_JS_INIT_POS,
@@ -451,10 +560,13 @@ function core_use_handler(string $path,
     return false;  # shit happens.. :)
 }
 
-#
-# Build endpoint URL by handler path
-
-function core_route_path_to_url($handler_path)
+/**
+ * Build external URL by handler path.
+ *
+ * @param string $handler_path Handler path in dotted or slash notation.
+ * @return string Absolute URL using current request root.
+ */
+function core_route_path_to_url(string $handler_path): string
 {
     $path = _route_std_path($handler_path);
     return sys_opt_get('request', 'root') . $path;
@@ -463,17 +575,25 @@ function core_route_path_to_url($handler_path)
 #
 # Build static URL path/root
 
-/* Alias to static_url_path() */
-function core_static_url($dir=NULL)
+/**
+ * Alias to core_static_url_path().
+ *
+ * @param string|null $dir Base template directory (defaults to COMS_ROOT).
+ * @return string URL path to /web directory.
+ */
+function core_static_url(?string $dir = null): string
 {
     return core_static_url_path($dir);
 }
 
-/** Make URL path to static (/web) folder of the template
- * @var tpl_path string Path to the target template (or use script's __DIR__)
- * @return       string URL path to static folder (w/o tailing slash)
+/**
+ * Build URL path to static (/web) folder of the template.
+ *
+ * @param string|null $tpl_path Filesystem path to template directory (usually __DIR__).
+ *                              Null falls back to COMS_ROOT.
+ * @return string URL path to /web folder (without trailing slash).
  */
-function core_static_url_path($tpl_path=NULL)
+function core_static_url_path(?string $tpl_path = null): string
 {
     if (is_null($tpl_path)) $tpl_path = COMS_ROOT;
     $tpl_path = str_replace('\\', '/', $tpl_path);
@@ -484,11 +604,14 @@ function core_static_url_path($tpl_path=NULL)
     return $path;
 }
 
-/** Make URL root to static (/web) folder of the template
- * @var tpl_path string Path to the target template (or use script's __DIR__)
- * @return       string URL root to static folder (w/o tailing slash)
+/**
+ * Build absolute URL to static (/web) folder of the template.
+ *
+ * @param string|null $tpl_path Filesystem path to template directory (usually __DIR__).
+ * @return string Absolute URL to /web folder (without trailing slash).
  */
-function core_static_url_root($tpl_path=NULL)
+function core_static_url_root(?string $tpl_path = null): string
 {
     return sys_opt_get('request', 'root').core_static_url_path($tpl_path);
 }
+

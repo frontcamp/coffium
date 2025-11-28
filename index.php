@@ -113,7 +113,7 @@ catch (CoreTerminateRoute $e)
     sys_opt('response', 'status', CORE_STATUS_TERMINATED);
     sys_opt('response', 'message', $message);
 
-    if ($e->hasRedirect())
+    if ($e->has_redirect())
     {
         $location = $e->redirect_url;
         $status   = $e->redirect_status ?? 302;
