@@ -100,7 +100,7 @@ class CoreTerminateRoute extends RuntimeException
  *
  * @throws CoreTerminateRoute
  */
-function core_terminate_route(string $message='Route terminated'): void
+function core_terminate_route(string $message = 'Route terminated'): void
 {
     throw new CoreTerminateRoute($message);
 }
@@ -118,8 +118,8 @@ function core_terminate_route(string $message='Route terminated'): void
  */
 function core_terminate_and_redirect(
             string $location,
-            int $status = 302,
-            ?string $x_redirect_by = CORE_NAME,
+               int $status = 302,
+           ?string $x_redirect_by = CORE_NAME,
             string $message = 'Route terminated with redirect'
          ): void
 {
@@ -165,7 +165,10 @@ function get_route_root(): string
  * @param bool        $auto_store When true, push previous root into stack.
  * @return string Current route root after change.
  */
-function set_route_root(?string $new_root = null, bool $auto_store = true): string
+function set_route_root(
+            ?string $new_root = null,
+               bool $auto_store = true
+         ): string
 {
     global $_ROUTE_ROOT, $_ROUTE_ROOT_STACK;
     if ($auto_store) array_push($_ROUTE_ROOT_STACK, $_ROUTE_ROOT);
@@ -249,7 +252,7 @@ function core_load_translations(string $lng_path): void
  * @return string Absolute (or route-relative) path.
  */
 function _route_mk_path(
-            ?string $root = null,
+           ?string $root = null,
             string $path = '',
             string $name = '',
             string $prefix = '',
@@ -448,12 +451,12 @@ function core_use_handler(
             $act_path = _route_mk_path($_ROUTE_ROOT, $path, $_name, 'act', 'php');
             $tpl_path = _route_mk_path($_ROUTE_ROOT, $path, $_name, 'tpl', 'php');
 
-            $css_path = _route_mk_path($_ROUTE_ROOT, _route_std_path($path.'/web/s'), $_name, '', 'css');
-            $css_url_path = _route_mk_path('', _route_std_path($path.'/web/s'), $_name, '', 'css');
+            $css_path = _route_mk_path($_ROUTE_ROOT, $path.'/web/s', $_name, '', 'css');
+            $css_url_path = _route_mk_path('', $path.'/web/s', $_name, '', 'css');
             $css_url_root = sys_opt_get('request', 'root').COMS_PATH.$css_url_path;
 
-            $js_path = _route_mk_path($_ROUTE_ROOT, _route_std_path($path.'/web/s'), $_name, '', 'js');
-            $js_url_path = _route_mk_path('', _route_std_path($path.'/web/s'), $_name, '', 'js');
+            $js_path = _route_mk_path($_ROUTE_ROOT, $path.'/web/s', $_name, '', 'js');
+            $js_url_path = _route_mk_path('', $path.'/web/s', $_name, '', 'js');
             $js_url_root = sys_opt_get('request', 'root').COMS_PATH.$js_url_path;
 
             if ($flags & HDL_ACT and is_file($act_path)) $handler_found |= HDL_ACT;
