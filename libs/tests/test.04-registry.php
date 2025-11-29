@@ -3,7 +3,6 @@ defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 /* System registry tests */
 
-
 /**
  * Basic check of P_NULL and is_pnull().
  */
@@ -19,7 +18,6 @@ function core_registry_pnull_test()
     core_assert_false(is_pnull(0));
     core_assert_false(is_pnull('P_NULL'));
 }
-
 
 /**
  * Registry stack: store_system_registry() / restore_system_registry() / set_system_registry().
@@ -50,7 +48,6 @@ function core_registry_store_restore_test()
     core_assert_same($orig_hash, sys_hash());
     core_assert_same($initial_stack_depth, count($_SYS_STACK));
 }
-
 
 /**
  * Basic API: sys(), sys_get(), sys_add(), sys_set(), sys_check()/sys_equal()/sys_same,
@@ -100,7 +97,6 @@ function core_registry_sys_shortcuts_test()
     restore_system_registry();
 }
 
-
 /**
  * Registry as plain list:
  * sys_push()/sys_pop(), sys_unshift()/sys_shift(),
@@ -147,12 +143,14 @@ function core_registry_sys_array_ops_test()
     core_assert_false(sys_has_value('x'));
 
     # search
-    $key_d = sys_search('d');
+    $key_d = sys_search('d');  # existing key
     core_assert_true($key_d !== false);
+
+    $key_x = sys_search('x');  # absent key
+    core_assert_false($key_x);
 
     restore_system_registry();
 }
-
 
 /**
  * Basic sys_opt_* operations and _ensure_opt_array() behavior.
@@ -212,7 +210,6 @@ function core_registry_sys_opt_basic_test()
 
     restore_system_registry();
 }
-
 
 /**
  * Array-like operations for sys_opt_*:
@@ -285,7 +282,6 @@ function core_registry_sys_opt_array_ops_test()
 
     restore_system_registry();
 }
-
 
 /**
  * P_NULL semantics in sys() and sys_opt() shortcuts.

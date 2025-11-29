@@ -35,7 +35,7 @@ sys_unshift_unique(v) - add unique value to the beginning of an array
 sys_remove(v) - remove 1st occurrence of a given value [-strict]
 sys_remove_all(v) - remove all occurrences of a given value [-strict]
 sys_same(k,v) - alias to sys_check() with turned on strict flag
-sys_search(v) - find first instance of v and return its key, null otherwise
+sys_search(v) - find first instance of v and return its key, false otherwise
 sys_set(k,v) - alias to sys_add()
 
 Sub array API (aka "options")
@@ -62,7 +62,7 @@ sys_opt_unshift_unique(o,v) - add unique value to the beginning of an array
 sys_opt_remove(o,v) - remove 1st occurrence of a given value [-strict]
 sys_opt_remove_all(o,v) - remove all occurrences of a given value [-strict]
 sys_opt_same(o,k,v) - alias to sys_opt_check() with strict flag enabled
-sys_opt_search(o,v) - find first instance of v and return its key, null otherwise
+sys_opt_search(o,v) - find first instance of v and return its key, false otherwise
 sys_opt_set(o,k,v) - alias to sys_opt_add()
 */
 
@@ -357,7 +357,7 @@ function sys_opt_has_value(
     return in_array($value, $SYS[$opt], $strict);
 }
 
-function sys_opt_insert(int|string $opt, int $pos, mixed $val): void
+function sys_opt_insert(int|string $opt, int $pos, mixed $val): int
 {
     global $SYS;
     _ensure_opt_array($opt);
@@ -376,6 +376,8 @@ function sys_opt_insert(int|string $opt, int $pos, mixed $val): void
         // index >= length => append to the end
         sys_opt_push($opt, $val);
     }
+
+    return count($SYS[$opt]);
 }
 
 function sys_opt_keys(int|string $opt): array
