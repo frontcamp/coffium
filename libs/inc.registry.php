@@ -362,11 +362,18 @@ function sys_opt_insert(int|string $opt, int $pos, mixed $val): void
     global $SYS;
     _ensure_opt_array($opt);
 
-    if ($pos < 0) $pos = 0;
+    $len = count($SYS[$opt]);
 
-    if ($pos < count($SYS[$opt])) {
+    # negative index: position from the end (like Python)
+    if ($pos < 0) {
+        $pos = $len + $pos;      # -1 => $len-1 (before last element)
+        if ($pos < 0) $pos = 0;  # clamp to start if still negative
+    }
+
+    if ($pos < $len) {
         array_splice($SYS[$opt], $pos, 0, $val);
     } else {
+        // index >= length => append to the end
         sys_opt_push($opt, $val);
     }
 }
