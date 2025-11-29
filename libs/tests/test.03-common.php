@@ -250,61 +250,258 @@ function core_common_file_get_data_test()
     rmtree($base_dir);
 }
 
+function core_common_file_put_data_test()
+{
+    # verify that file_put_data() writes valid PHP assignment with given var name
+    $base_dir = path_normjoin(TEMP_ROOT, 'core-common-file-data-test');
+    if (!is_dir($base_dir)) mkdir($base_dir, 0777, true);
+
+    $file1 = path_normjoin($base_dir, 'put-default.php');
+    $file2 = path_normjoin($base_dir, 'put-custom.php');
+
+    # write using default and explicit variable names
+    $data1 = array(1, 2, 3);
+    file_put_data($file1, $data1);  # default 'DATA'
+
+    $data2 = array('nested' => array('k' => 'v'));
+    file_put_data($file2, $data2, 'STORAGE');
+
+    core_assert_file($file1);
+    core_assert_file($file2);
+
+    # include generated files and verify that variables are defined and equal
+    unset($DATA, $STORAGE);
+
+    include $file1;
+    include $file2;
+
+    core_assert_array($DATA);
+    core_assert_same_arrays($DATA, $data1);
+
+    core_assert_array($STORAGE);
+    core_assert_same_arrays($STORAGE, $data2);
+
+    # cleanup test files
+    rmtree($base_dir);
+}
+
 /**
  * FYLE SYSTEM & PATHS
  * -------------------
  */
 
+function core_common_path_normalize_test()
+{
+    $ds = DIRECTORY_SEPARATOR;
+
+    # verify that empty string stays empty (no "." normalization)
+    core_assert_same(path_normalize(''), '');
+
+    # verify collapsing duplicate separators and unifying slashes
+    $norm = path_normalize('foo\\bar//baz///');
+    core_assert_same($norm, 'foo'.$ds.'bar'.$ds.'baz');
+
+    # verify normalisation of root path
+    $root = path_normalize('/');
+    core_assert_same($root, $ds);
+
+    # verify that "." and ".." segments are preserved as-is
+    $p = path_normalize('/a/./b/../c');
+    $segments = explode($ds, trim($p, '/\\'));
+    core_assert_same_arrays($segments, array('a', '.', 'b', '..', 'c'));
+}
+
+function core_common_path_join_test()
+{
+    $ds = DIRECTORY_SEPARATOR;
+
+    # verify joining of simple relative segments
+    core_assert_same(
+        path_join('foo', 'bar'),
+        'foo'.$ds.'bar'
+    );
+
+    core_assert_same(
+        path_join('foo', 'bar', 'baz'),
+        'foo'.$ds.'bar'.$ds.'baz'
+    );
+
+    # verify trimming of slashes and ignoring empty segments
+    core_assert_same(
+        path_join('', 'foo/', '', 'bar'),
+        'foo'.$ds.'bar'
+    );
+
+    # verify that absolute segment resets all previous parts
+    core_assert_same(
+        path_join('foo', '/bar'),
+        '/bar'
+    );
+}
+
+function core_common_path_normjoin_test()
+{
+    $ds = DIRECTORY_SEPARATOR;
+
+    # verify join+normalize for simple relative segments
+    $p = path_normjoin('foo', 'bar', 'baz');
+    core_assert_same($p, 'foo'.$ds.'bar'.$ds.'baz');
+
+    # verify behavior when absolute segment appears in the middle
+    $p2 = path_normjoin('foo//', '/bar');
+    core_assert_same($p2, path_normalize('/bar'));
+
+    # verify that empty argument list produces an empty string
+    core_assert_same(path_normjoin(), '');
+}
+
+function core_common_abs_to_rel_test()
+{
+    $ds = DIRECTORY_SEPARATOR;
+
+    # verify that project root maps to a single separator
+    $rel_root = abs_to_rel(PROJ_ROOT);
+    core_assert_same($rel_root, $ds);
+
+    # verify that a direct child directory becomes a simple relative path
+    $libs_root = path_normjoin(PROJ_ROOT, 'libs');
+    $rel_libs  = abs_to_rel($libs_root);
+    core_assert_same($rel_libs, 'libs');
+
+    # verify that nested directory becomes a relative path with OS separators
+    $tests_root = path_normjoin(PROJ_ROOT, 'libs', 'tests');
+    $rel_tests  = abs_to_rel($tests_root);
+    core_assert_same($rel_tests, 'libs'.$ds.'tests');
+
+    # verify that clearly external (relative) paths are rejected
+    $thrown1 = false;
+    try {
+        abs_to_rel('path-outside-project-root');
+    } catch (InvalidArgumentException $e) {
+        $thrown1 = true;
+    }
+    core_assert_true($thrown1);
+
+    # verify that paths sharing only a string prefix with PROJ_ROOT are rejected
+    $fake = PROJ_ROOT.'_suffix';
+    $thrown2 = false;
+    try {
+        abs_to_rel($fake);
+    } catch (InvalidArgumentException $e) {
+        $thrown2 = true;
+    }
+    core_assert_true($thrown2);
+}
+
+function core_common_scandir_advanced_test()
+{
+    # prepare isolated temporary directory tree with folders and files
+    $base_dir = path_normjoin(TEMP_ROOT, 'tests-common-scandir');
+
+    rmtree($base_dir);  # ensure clean state
+    mkdir($base_dir, 0777, true);
+
+    $dir_b = path_normjoin($base_dir, 'b-sub');  # intentionally unordered
+    $dir_a = path_normjoin($base_dir, 'a-sub');
+    mkdir($dir_b, 0777, true);
+    mkdir($dir_a, 0777, true);
+
+    $file1 = path_normjoin($base_dir, 'file10.txt');
+    $file2 = path_normjoin($base_dir, 'file2.txt');
+    file_put_contents($file1, 'x');
+    file_put_contents($file2, 'x');
+
+    # verify that folders go first, then files, each group natsorted
+    $items = scandir_advanced($base_dir);
+    core_assert_same_arrays($items, array('a-sub', 'b-sub', 'file2.txt', 'file10.txt'));
+
+    rmtree($base_dir);
+}
+
+function core_common_rmtree_test()
+{
+    # create nested directory tree with several files
+    $base_dir = path_normjoin(TEMP_ROOT, 'tests-common-rmtree');
+    rmtree($base_dir);  # clean up any leftovers from previous runs
+
+    $level1 = path_normjoin($base_dir, 'level1');
+    $level2 = path_normjoin($level1, 'level2');
+
+    mkdir($level2, 0777, true);
+
+    file_put_contents(path_normjoin($base_dir, 'root.txt'), 'root');
+    file_put_contents(path_normjoin($level1, 'l1.txt'), 'l1');
+    file_put_contents(path_normjoin($level2, 'l2.txt'), 'l2');
+
+    core_assert_dir($base_dir);
+
+    # verify that rmtree() removes the whole tree
+    rmtree($base_dir);
+    core_assert_false(is_dir($base_dir));
+
+    # verify that repeated calls on non-existing path are safe no-ops
+    rmtree($base_dir);
+    core_assert_false(is_dir($base_dir));
+}
 
 /**
  * HTTP / WEB UTILITIES
  * --------------------
  */
 
+function core_common_get_client_ip_test()
+{
+    # backup original $_SERVER to avoid side effects between tests
+    $backup = $_SERVER;
 
+    # verify fallback behavior when no related headers are present
+    unset($_SERVER['HTTP_CLIENT_IP'], $_SERVER['HTTP_X_FORWARDED_FOR'], $_SERVER['REMOTE_ADDR']);
+    core_assert_same(get_client_ip(), '0.0.0.0');
 
+    # verify REMOTE_ADDR only
+    $_SERVER['REMOTE_ADDR'] = '192.0.2.45';
+    core_assert_same(get_client_ip(), '192.0.2.45');
 
+    # verify that HTTP_X_FORWARDED_FOR is used and first IP is taken
+    unset($_SERVER['HTTP_CLIENT_IP']);
+    $_SERVER['HTTP_X_FORWARDED_FOR'] = '203.0.113.1, 10.0.0.1';
+    core_assert_same(get_client_ip(), '203.0.113.1');
 
+    # verify that HTTP_CLIENT_IP has the highest priority
+    $_SERVER['HTTP_CLIENT_IP'] = '198.51.100.25';
+    core_assert_same(get_client_ip(), '198.51.100.25');
 
+    # restore original server environment
+    $_SERVER = $backup;
+}
 
+function core_common_redirect_test()
+{
+    # verify public signature of redirect() without executing it (no die())
+    $ref = new ReflectionFunction('redirect');
 
+    $params = $ref->getParameters();
+    core_assert_same(count($params), 3);
 
+    # verify that "location" is a required first parameter
+    core_assert_same($params[0]->getName(), 'location');
+    core_assert_false($params[0]->isOptional());
 
+    # verify that "status" is optional and defaults to 302
+    core_assert_same($params[1]->getName(), 'status');
+    core_assert_true($params[1]->isOptional());
+    core_assert_same($params[1]->getDefaultValue(), 302);
 
+    # verify that "x_redirect_by" is optional and defaults to CORE_NAME
+    core_assert_same($params[2]->getName(), 'x_redirect_by');
+    core_assert_true($params[2]->isOptional());
+    core_assert_same($params[2]->getDefaultValue(), CORE_NAME);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function core_common_reload_test()
+{
+    # verify that reload() helper exists and has no parameters
+    $ref = new ReflectionFunction('reload');
+    core_assert_same($ref->getNumberOfParameters(), 0);
+}
 
