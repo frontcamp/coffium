@@ -5,6 +5,11 @@ $GLOBALS['SYS']['included'][] = __FILE__;
 
 
 /**
+ * CONVERTING BOOL TYPES
+ * ---------------------
+ */
+
+/**
  * Convert a boolean value to integer representation (1 or 0).
  *
  * @param bool $value Source boolean value.
@@ -70,6 +75,100 @@ function some_to_yesno(mixed $value): string
     return ($value == true) ? 'Yes' : 'No';
 }
 
+
+/**
+ * VERIFYING NUMERIC TYPES
+ * -----------------------
+ */
+
+/**
+ * Check whether a value is a float or an integer.
+ *
+ * @param mixed $value Value to check.
+ * @return bool True for float or int, false otherwise.
+ */
+function is_float_or_int(mixed $value): bool
+{
+    return is_float($value) || is_int($value);
+}
+
+/**
+ * Check whether a value is an integer or a float.
+ *
+ * Alias of is_float_or_int() with reversed wording.
+ *
+ * @param mixed $value Value to check.
+ * @return bool True for int or float, false otherwise.
+ */
+function is_int_or_float(mixed $value): bool
+{
+    return is_int($value) || is_float($value);
+}
+
+/**
+ * Check whether a value is an integer or a sign-prefixed integer string.
+ *
+ * Examples of values returning true: 123, "123", "-5", "+42"
+ *
+ * @param int|string $value Integer or string to inspect.
+ * @return bool True if $value represents an integer, false otherwise.
+ */
+function is_int_like(int|string $value): bool
+{
+    if (is_int($value)) return true;
+
+    $str = (string) $value;
+
+    $has_sign = str_starts_with($str, '-')
+             || str_starts_with($str, '+');
+
+    return $has_sign
+        ? ctype_digit(substr($str, 1))
+        : ctype_digit($str);
+}
+
+/**
+ * Check if a string contains a decimal point.
+ *
+ * @param string $value String representation of a number.
+ * @return bool True if the string contains a dot, false otherwise.
+ */
+function is_decimal(string $value): bool
+{
+    return (false !== strpos($value, '.'));
+}
+
+
+/**
+ * NUMERIC UTILITIES
+ * -----------------
+ */
+
+/**
+ * Clamp numeric value to the given [min, max] range.
+ *
+ * @param int|float $value Value to clamp.
+ * @param int|float $min   Lower bound.
+ * @param int|float $max   Upper bound.
+ * @return int|float Clamped value.
+ */
+function ntrim(
+            int|float $value,
+            int|float $min,
+            int|float $max
+         ): int|float
+{
+    if ($value < $min) $value = $min;
+    if ($value > $max) $value = $max;
+    return $value;
+}
+
+
+/**
+ * COLLECTIONS / ARRAYS
+ * --------------------
+ */
+
 /**
  * Return a new empty array by reference.
  *
@@ -82,6 +181,12 @@ function &empty_array(): array
     $a = array();
     return $a;
 }
+
+
+/**
+ * WORKING WITH DATA FILES
+ * -----------------------
+ */
 
 /**
  * Load a variable from a PHP data file.
@@ -134,123 +239,66 @@ function file_put_data(
     file_put_contents($file_path, $s, LOCK_EX);
 }
 
-/**
- * Check whether a value is a float or an integer.
- *
- * @param mixed $value Value to check.
- * @return bool True for float or int, false otherwise.
- */
-function is_float_or_int(mixed $value): bool
-{
-    return is_float($value) || is_int($value);
-}
 
 /**
- * Check whether a value is an integer or a float.
- *
- * Alias of is_float_or_int() with reversed wording.
- *
- * @param mixed $value Value to check.
- * @return bool True for int or float, false otherwise.
+ * FYLE SYSTEM & PATHS
+ * -------------------
  */
-function is_int_or_float(mixed $value): bool
+
+function path_normalize(string $path): string
 {
-    return is_int($value) || is_float($value);
-}
+    $path = trim($path);
 
-/**
- * Check if a string contains a decimal point.
- *
- * @param string $value String representation of a number.
- * @return bool True if the string contains a dot, false otherwise.
- */
-function is_decimal(string $value): bool
-{
-    return (false !== strpos($value, '.'));
-}
-
-/**
- * Check whether a value is an integer or a sign-prefixed integer string.
- *
- * Examples of values returning true: 123, "123", "-5", "+42"
- *
- * @param int|string $value Integer or string to inspect.
- * @return bool True if $value represents an integer, false otherwise.
- */
-function is_int_like(int|string $value): bool
-{
-    if (is_int($value)) return true;
-
-    $str = (string) $value;
-
-    $has_sign = str_starts_with($str, '-')
-             || str_starts_with($str, '+');
-
-    return $has_sign
-        ? ctype_digit(substr($str, 1))
-        : ctype_digit($str);
-}
-
-/**
- * Clamp numeric value to the given [min, max] range.
- *
- * @param int|float $value Value to clamp.
- * @param int|float $min   Lower bound.
- * @param int|float $max   Upper bound.
- * @return int|float Clamped value.
- */
-function ntrim(
-            int|float $value,
-            int|float $min,
-            int|float $max
-         ): int|float
-{
-    if ($value < $min) $value = $min;
-    if ($value > $max) $value = $max;
-    return $value;
-}
-
-/**
- * Perform an HTTP redirect (or JS fallback) and terminate execution.
- *
- * @param string             $location     Target URL.
- * @param int                $status       HTTP status code (must be 3xx).
- * @param string|false|null  $x_redirect_by Optional value for X-Redirect-By header;
- *                                          pass false to skip the header.
- * @return void
- */
-function redirect(
-            string $location,
-            int $status = 302,
-            string|false|null $x_redirect_by = CORE_NAME
-         ): void
-{
-    if ($status < 300 || $status > 399) {
-        trigger_error(
-            'HTTP redirect status code must be a redirection code, 3xx.',
-            E_USER_ERROR
-        );
-    } elseif (!headers_sent()) {  # HTTP redirection
-        if (is_string($x_redirect_by)) {
-            header('X-Redirect-By: '.$x_redirect_by);
-        }
-        header('Location: '.$location, true, $status);
-    } else {  # JS redirection
-        echo "<script type='text/JavaScript'>document.location.href='$location';</script>\n";
+    if ($path === '') {
+        return '';
     }
 
-    die('<a href="'.$location.'">Please click here if you are not redirected within a few seconds.</a>');
-}
+    // Приводим разделители к одному виду
+    $path = str_replace('\\', '/', $path);
 
-/**
- * Reload current page via redirect.
- *
- * @return void
- */
-function reload(): void
-{
-    redirect('?');
-}
+    $prefix   = '';
+    $absolute = false;
+    $unc      = false;
+
+    // Windows-диск: C:...
+    if (preg_match('~^[A-Za-z]:~', $path)) {
+        $prefix = substr($path, 0, 2);
+        $path   = substr($path, 2);
+    }
+
+    // UNC-путь или обычный абсолютный
+    if (strncmp($path, '//', 2) === 0) {
+        $unc  = true;
+        $path = substr($path, 2);
+    } elseif (strncmp($path, '/', 1) === 0) {
+        $absolute = true;
+        $path     = substr($path, 1);
+    }
+
+    $segments = explode('/', $path);
+    $parts    = array();
+
+    foreach ($segments as $seg) {
+        if ($seg === '' || $seg === '.') {
+            continue;
+        }
+
+        if ($seg === '..') {
+            if (!empty($parts) && end($parts) !== '..') {
+                array_pop($parts);
+                continue;
+            }
+
+            // Для относительных путеи оставляем ведущие ..
+            if (!$absolute && $prefix === '') {
+                $parts[] = '..';
+            }
+
+            continue;
+        }
+
+        $parts[] = $seg;
+    }
 
 /**
  * Convert absolute filesystem path to a project-relative path.
@@ -331,36 +379,6 @@ function abs_to_rel(string $path, string $root=PROJ_ROOT): string
     return $rel === '' ? $ds : $rel;
 }
 
-
-/**
- * Recursively remove a directory tree.
- *
- * Silently returns if the path is not a directory or cannot be opened.
- *
- * @param string $path Directory path to remove.
- * @return void
- */
-function rmtree(string $path): void
-{
-    if (!is_dir($path)) return;
-
-    $dir = @opendir($path);
-    if ($dir === false) return;  # unable to open directory
-
-    while (false !== ($name = readdir($dir)))
-    {
-        if ($name === '.' || $name === '..') continue;
-        $entry = $path.'/'.$name;
-        if (is_dir($entry)) {
-            rmtree($entry);
-        } elseif (is_file($entry)) {
-            @unlink($entry);
-        }
-    }
-    closedir($dir);
-    @rmdir($path);
-}
-
 /**
  * List files and directories inside the specified path.
  *
@@ -407,6 +425,41 @@ function scandir_advanced(string $path): array
 }
 
 /**
+ * Recursively remove a directory tree.
+ *
+ * Silently returns if the path is not a directory or cannot be opened.
+ *
+ * @param string $path Directory path to remove.
+ * @return void
+ */
+function rmtree(string $path): void
+{
+    if (!is_dir($path)) return;
+
+    $dir = @opendir($path);
+    if ($dir === false) return;  # unable to open directory
+
+    while (false !== ($name = readdir($dir)))
+    {
+        if ($name === '.' || $name === '..') continue;
+        $entry = $path.'/'.$name;
+        if (is_dir($entry)) {
+            rmtree($entry);
+        } elseif (is_file($entry)) {
+            @unlink($entry);
+        }
+    }
+    closedir($dir);
+    @rmdir($path);
+}
+
+
+/**
+ * HTTP / WEB-UTILITIES
+ * --------------------
+ */
+
+/**
  * Get client IP address from server variables.
  *
  * NOTE: This function does not validate or filter the value,
@@ -435,5 +488,47 @@ function get_client_ip(): string
     }
 
     return '0.0.0.0';
+}
+
+/**
+ * Perform an HTTP redirect (or JS fallback) and terminate execution.
+ *
+ * @param string             $location     Target URL.
+ * @param int                $status       HTTP status code (must be 3xx).
+ * @param string|false|null  $x_redirect_by Optional value for X-Redirect-By header;
+ *                                          pass false to skip the header.
+ * @return void
+ */
+function redirect(
+            string $location,
+            int $status = 302,
+            string|false|null $x_redirect_by = CORE_NAME
+         ): void
+{
+    if ($status < 300 || $status > 399) {
+        trigger_error(
+            'HTTP redirect status code must be a redirection code, 3xx.',
+            E_USER_ERROR
+        );
+    } elseif (!headers_sent()) {  # HTTP redirection
+        if (is_string($x_redirect_by)) {
+            header('X-Redirect-By: '.$x_redirect_by);
+        }
+        header('Location: '.$location, true, $status);
+    } else {  # JS redirection
+        echo "<script type='text/JavaScript'>document.location.href='$location';</script>\n";
+    }
+
+    die('<a href="'.$location.'">Please click here if you are not redirected within a few seconds.</a>');
+}
+
+/**
+ * Reload current page via redirect.
+ *
+ * @return void
+ */
+function reload(): void
+{
+    redirect('?');
 }
 
