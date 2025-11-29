@@ -77,8 +77,8 @@ function some_to_yesno(mixed $value): string
 
 
 /**
- * VERIFYING NUMERIC TYPES
- * -----------------------
+ * CHECKING NUMERIC TYPES
+ * ----------------------
  */
 
 /**
@@ -140,8 +140,8 @@ function is_decimal(string $value): bool
 
 
 /**
- * NUMERIC UTILITIES
- * -----------------
+ * NUMERICAL UTILITIES
+ * -------------------
  */
 
 /**
@@ -245,28 +245,38 @@ function file_put_data(
  * -------------------
  */
 
+/**
+ * Path normalization similar to Python's os.path.normpath,
+ * but WITHOUT processing "." and ".." segments.
+ *
+ * - Unifies slashes and backslashes to the current DIRECTORY_SEPARATOR.
+ * - Collapses duplicate separators.
+ * - Preserves absolute / UNC / drive-prefixed paths.
+ * - Does NOT resolve "." or "..".
+ */
 function path_normalize(string $path): string
 {
     $path = trim($path);
 
     if ($path === '') {
+        // Python's normpath('') returns ".", but here we keep it empty.
         return '';
     }
 
-    // Приводим разделители к одному виду
-    $path = str_replace('\\', '/', $path);
+    // Normalize all separators to "/" for internal processing
+    $path = str_replace(array('\\', '/'), '/', $path);
 
     $prefix   = '';
     $absolute = false;
     $unc      = false;
 
-    // Windows-диск: C:...
+    // Windows drive prefix: "C:..."
     if (preg_match('~^[A-Za-z]:~', $path)) {
         $prefix = substr($path, 0, 2);
         $path   = substr($path, 2);
     }
 
-    // UNC-путь или обычный абсолютный
+    // UNC path ("//server/share") or regular absolute path ("/foo/bar")
     if (strncmp($path, '//', 2) === 0) {
         $unc  = true;
         $path = substr($path, 2);
@@ -279,26 +289,81 @@ function path_normalize(string $path): string
     $parts    = array();
 
     foreach ($segments as $seg) {
-        if ($seg === '' || $seg === '.') {
-            continue;
-        }
+        # collapse empty segments (duplicate slashes)
+        if ($seg === '') continue;
 
-        if ($seg === '..') {
-            if (!empty($parts) && end($parts) !== '..') {
-                array_pop($parts);
-                continue;
-            }
-
-            // Для относительных путеи оставляем ведущие ..
-            if (!$absolute && $prefix === '') {
-                $parts[] = '..';
-            }
-
-            continue;
-        }
-
+        # DO NOT process "." or ".." specially here:
+        # they are kept as-is, unlike Python normpath.
         $parts[] = $seg;
     }
+
+    $path = implode('/', $parts);
+
+    if ($absolute) $path = '/'.$path;
+    if ($unc) $path = '//'.$path;
+    if ($prefix !== '') $path = $prefix.$path;
+    if ($path === '' && $absolute) {
+        $path = '/';
+    } elseif ($path === '' && $prefix !== '') {
+        $path = $prefix . '/';
+    }
+
+    # convert internal "/" back to OS-specific separator
+    if (DIRECTORY_SEPARATOR !== '/') {
+        $path = str_replace('/', DIRECTORY_SEPARATOR, $path);
+    }
+
+    return $path;
+}
+
+/**
+ * Simple joining of path parts without normalization.
+ *
+ * - Skips empty parts.
+ * - If a part looks like an absolute path, it replaces the previous result.
+ * - Uses DIRECTORY_SEPARATOR between non-empty parts.
+ */
+function path_join(string ...$parts): string
+{
+    $result = '';
+
+    foreach ($parts as $part) {
+        $part = trim($part);
+        if ($part === '') {
+            continue;
+        }
+
+        if ($result === '') {
+            $result = $part;
+            continue;
+        }
+
+        # if the next part is an absolute path or UNC/drive-prefixed path,
+        # drop everything before it (Python-like os.path.join behavior).
+        if (
+            $part[0] === '/' ||
+            $part[0] === '\\' ||
+            preg_match('~^[A-Za-z]:[\\\\/]~', $part) ||
+            strncmp($part, '//', 2) === 0
+        ) {
+            $result = $part;
+            continue;
+        }
+
+        $result = rtrim($result, "/\\") . DIRECTORY_SEPARATOR . ltrim($part, "/\\");
+    }
+
+    return $result;
+}
+
+/**
+ * Join multiple path parts and normalize the result.
+ */
+function path_normjoin(string ...$parts): string
+{
+    if (!$parts) return '';
+    return path_normalize(path_join(...$parts));
+}
 
 /**
  * Convert absolute filesystem path to a project-relative path.
@@ -455,7 +520,7 @@ function rmtree(string $path): void
 
 
 /**
- * HTTP / WEB-UTILITIES
+ * HTTP / WEB UTILITIES
  * --------------------
  */
 
