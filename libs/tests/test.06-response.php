@@ -3,6 +3,25 @@ defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 /* Response router tests for /libs/inc.response.php */
 
+/*
+ * NOTE:
+ *   This test module does not yet fully cover all behavior of /libs/inc.response.php.
+ *   The following areas are known gaps or only partially covered and are left out
+ *   intentionally for now due to time constraints:
+ *
+ *   1) Termination API (CoreTerminateRoute, core_terminate_route(), core_terminate_and_redirect()).
+ *   2) Language loading (core_load_translations() + "lng.loaded").
+ *   3) Negative and edge cases of path-helpers (_route_std_path(), _route_mk_path()).
+ *   4) Internal format of _hdl_to_str() and the contents of "route.stack".
+ *   5) Invalid or inconsistent combinations of HDL_* flags (branches with trigger_error()).
+ *   6) Returning false from core_use_handler() when a handler is not found.
+ *   7) Buffering details (actual buffer contents for CORE_ENABLE_BUFFER / CORE_RETURN_OUTPUT).
+ *   8) store_route_root() behavior with multiple nested route roots.
+ *
+ *   The logic of /libs/inc.response.php has been analyzed with the help
+ *   of AI, so the probability of errors is already minimal. However,
+ *   the tests should be completed when possible.
+ */
 
 define('MAX_DIR_NUMBER', 3);
 define('MAX_DIR_DEPTH', 5);
@@ -827,6 +846,109 @@ function cell_n3_d5_default_test()
     core_assert_equal(sys_opt_count('hdl.preload.js'), 1);
     core_assert_equal(sys_opt_get('hdl.preload.js', 0), TEST_URL_ROOT.'/web/s/default.js');
     #ndump('$SYS', $GLOBALS['SYS']);
+    restore_system_registry();
+}
+
+
+/**
+ * HDL_INIT flag tests
+ * -------------------
+ */
+
+function hdl_init_preload_stack_order_test()
+{
+    store_system_registry();
+
+    # reset stacks and initial positions
+    sys_delete('hdl.preload.css');
+    sys_delete('hdl.preload.js');
+
+    global $_H_PRELOAD_CSS_INIT_POS, $_H_PRELOAD_JS_INIT_POS;
+    $_H_PRELOAD_CSS_INIT_POS = 0;
+    $_H_PRELOAD_JS_INIT_POS  = 0;
+
+    # 1) first handler with HDL_INIT (d11)
+    core_use_handler('d11.test11', empty_array(), HDL_CSS_JS | HDL_INIT);
+
+    # 2) regular handler without HDL_INIT (d21/d22)
+    core_use_handler('d21.d22.test22', empty_array(), HDL_CSS_JS);
+
+    # 3) second handler with HDL_INIT (d31/d32/d33)
+    core_use_handler('d31.d32.d33.test33', empty_array(), HDL_CSS_JS | HDL_INIT);
+
+    # expected order:
+    #   0: d11/test11.*   (INIT)
+    #   1: d31/d32/d33/test33.* (INIT)
+    #   2: d21/d22/test22.* (regular, at the tail)
+    core_assert_equal(3, sys_opt_count('hdl.preload.css'));
+    core_assert_equal(3, sys_opt_count('hdl.preload.js'));
+
+    core_assert_equal(TEST_URL_ROOT.'/d11/web/s/test11.css',
+                      sys_opt_get('hdl.preload.css', 0));
+    core_assert_equal(TEST_URL_ROOT.'/d31/d32/d33/web/s/test33.css',
+                      sys_opt_get('hdl.preload.css', 1));
+    core_assert_equal(TEST_URL_ROOT.'/d21/d22/web/s/test22.css',
+                      sys_opt_get('hdl.preload.css', 2));
+
+    core_assert_equal(TEST_URL_ROOT.'/d11/web/s/test11.js',
+                      sys_opt_get('hdl.preload.js', 0));
+    core_assert_equal(TEST_URL_ROOT.'/d31/d32/d33/web/s/test33.js',
+                      sys_opt_get('hdl.preload.js', 1));
+    core_assert_equal(TEST_URL_ROOT.'/d21/d22/web/s/test22.js',
+                      sys_opt_get('hdl.preload.js', 2));
+
+    restore_system_registry();
+}
+
+
+/**
+ * CONTEXT flags tests
+ * -------------------
+ */
+
+function handler_context_flags_test()
+{
+    store_system_registry();
+
+    # 1) Base case: no special keys — context is unchanged, boolean result is returned
+    $ctx = array('x' => 10);
+    $res = core_use_handler('', $ctx);
+
+    core_assert_bool($res);
+    core_assert_equal(10, $ctx['x']);
+    core_assert_false(array_key_exists('CORE_EXTRACT_VARS', $ctx));
+    core_assert_false(array_key_exists('CORE_ENABLE_BUFFER', $ctx));
+    core_assert_false(array_key_exists('CORE_RETURN_OUTPUT', $ctx));
+
+    # 2) CORE_EXTRACT_VARS: key must be removed from context after the call
+    $ctx = array(
+        'x' => 20,
+        'CORE_EXTRACT_VARS' => true,
+    );
+    $res = core_use_handler('', $ctx);
+
+    core_assert_bool($res);
+    core_assert_equal(20, $ctx['x']);
+    core_assert_false(array_key_exists('CORE_EXTRACT_VARS', $ctx));
+
+    # 3) CORE_ENABLE_BUFFER: buffering is enabled, but the result is still boolean
+    $ctx = array(
+        'CORE_ENABLE_BUFFER' => true,
+    );
+    $res = core_use_handler('', $ctx);
+
+    core_assert_bool($res);
+    core_assert_false(array_key_exists('CORE_ENABLE_BUFFER', $ctx));
+
+    # 4) CORE_RETURN_OUTPUT: output is captured into buffer and returned as string
+    $ctx = array(
+        'CORE_RETURN_OUTPUT' => true,
+    );
+    $res = core_use_handler('', $ctx);
+
+    core_assert_string($res);
+    core_assert_false(array_key_exists('CORE_RETURN_OUTPUT', $ctx));
+
     restore_system_registry();
 }
 
