@@ -296,6 +296,10 @@ function _route_std_path(string $path): string
 /**
  * Initialize component API and its dependencies.
  *
+ * On the first call it also ensures that the global autorun initializer
+ * located at the routing root (<route_root>/COM_INI_FNAME) is executed
+ * once, if it exists and has not been loaded yet.
+ *
  * $target_path may be:
  *  - component alias ("/component" or "component");
  *  - full handler path ("component.sub.handler"), in this case
