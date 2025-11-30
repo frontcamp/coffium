@@ -268,9 +268,9 @@ function sys_opt(
             mixed $val = P_NULL
          ): mixed
 {
-    if (is_pnull($val)) {
+    if (is_pnull($val)) {  # set
         return sys_opt_get($opt, $key);
-    } else {
+    } else {               # get
         sys_opt_add($opt, $key, $val);
         return P_NULL;
     }

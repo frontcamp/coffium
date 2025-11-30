@@ -307,6 +307,15 @@ function _route_std_path(string $path): string
 function core_use_api(string $target_path): void
 {
     global $_ROUTE_ROOT;
+
+    # ensure root __init__.php file loaded (system startup)
+    $root_ini = _route_mk_path($_ROUTE_ROOT, '', COM_INI_FNAME);
+    if (!sys_opt_has_value('ini.loaded', $root_ini)
+     && is_file($root_ini)) {
+        require_once($root_ini);
+        sys_opt_push_unique('ini.loaded', $root_ini);
+     }
+
     $target_path = _route_std_path($target_path);
     $parts = explode('/', $target_path);
 
