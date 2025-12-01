@@ -298,12 +298,12 @@ function cell_n0_d0_default_test()  # Top level
     store_system_registry();
     core_use_handler('');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -343,9 +343,9 @@ function cell_n1_d1_default_test()
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/d11/act.default.php');
     core_assert_equal(sys_opt_get('hdl.loaded', 1), get_route_root().'/d11/tpl.default.php');
     # hdl.preload.css
-    core_assert_false(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -354,15 +354,15 @@ function cell_n1_d1_css_nodef_noasc_test()
 {
     store_system_registry();
     core_use_handler('d11.test11', empty_array(), HDL_CSS);
-    core_assert_false(sys_has_key('inf.loaded'));
-    core_assert_false(sys_has_key('ini.loaded'));
-    core_assert_false(sys_has_key('api.loaded'));
-    core_assert_false(sys_has_key('hdl.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('ini.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('hdl.loaded'));
     # hdl.preload.css
     core_assert_equal(sys_opt_count('hdl.preload.css'), 1);
     core_assert_equal(sys_opt_get('hdl.preload.css', 0), TEST_URL_ROOT.'/d11/web/s/test11.css');
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     //ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -372,12 +372,12 @@ function cell_n2_d1_default_test()
     store_system_registry();
     core_use_handler('d21');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -396,12 +396,12 @@ function cell_n2_d1_noasc_test()
 {
     store_system_registry();
     core_use_handler('d21', empty_array(), HDL_TPL|HDL_TRY_DEF);
-    core_assert_false(sys_has_key('inf.loaded'));
-    core_assert_false(sys_has_key('ini.loaded'));
-    core_assert_false(sys_has_key('api.loaded'));
-    core_assert_false(sys_has_key('hdl.loaded'));
-    core_assert_false(sys_has_key('hdl.preload.css'));
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('ini.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('hdl.loaded'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -411,12 +411,12 @@ function cell_n3_d1_default_test()
     store_system_registry();
     core_use_handler('d31');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -435,12 +435,12 @@ function cell_n3_d1_noasc_test()
 {
     store_system_registry();
     core_use_handler('d31', empty_array(), HDL_TPL|HDL_TRY_DEF);
-    core_assert_false(sys_has_key('inf.loaded'));
-    core_assert_false(sys_has_key('ini.loaded'));
-    core_assert_false(sys_has_key('api.loaded'));
-    core_assert_false(sys_has_key('hdl.loaded'));
-    core_assert_false(sys_has_key('hdl.preload.css'));
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('ini.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('hdl.loaded'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -477,7 +477,7 @@ function cell_n1_d2_default_test()
     core_assert_equal(sys_opt_get('hdl.preload.css', 0), TEST_URL_ROOT.'/web/s/header.css');
     core_assert_equal(sys_opt_get('hdl.preload.css', 1), TEST_URL_ROOT.'/web/s/footer.css');
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -487,12 +487,12 @@ function cell_n2_d2_default_test()
     store_system_registry();
     core_use_handler('d21.d22');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -511,12 +511,12 @@ function cell_n2_d2_js_nodef_noasc_test()
 {
     store_system_registry();
     core_use_handler('d21.d22.test22', empty_array(), HDL_JS);
-    core_assert_false(sys_has_key('inf.loaded'));
-    core_assert_false(sys_has_key('ini.loaded'));
-    core_assert_false(sys_has_key('api.loaded'));
-    core_assert_false(sys_has_key('hdl.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('ini.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('hdl.loaded'));
     # hdl.preload.css
-    core_assert_false(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
     # hdl.preload.js
     core_assert_equal(sys_opt_count('hdl.preload.js'), 1);
     core_assert_equal(sys_opt_get('hdl.preload.js', 0), TEST_URL_ROOT.'/d21/d22/web/s/test22.js');
@@ -529,12 +529,12 @@ function cell_n3_d2_default_test()
     store_system_registry();
     core_use_handler('d31.d32');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -574,9 +574,9 @@ function cell_n1_d3_default_test()
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/d11/d12/d13/act.default.php');
     core_assert_equal(sys_opt_get('hdl.loaded', 1), get_route_root().'/d11/d12/d13/tpl.default.php');
     # hdl.preload.css
-    core_assert_false(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -586,12 +586,12 @@ function cell_n2_d3_default_test()
     store_system_registry();
     core_use_handler('d21.d22.d23');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -611,12 +611,12 @@ function cell_n3_d3_default_test()
     store_system_registry();
     core_use_handler('d31.d32.d33');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -635,10 +635,10 @@ function cell_n3_d3_cssjs_nodef_noasc_test()
 {
     store_system_registry();
     core_use_handler('d31.d32.d33.test33', empty_array(), HDL_CSS_JS);
-    core_assert_false(sys_has_key('inf.loaded'));
-    core_assert_false(sys_has_key('ini.loaded'));
-    core_assert_false(sys_has_key('api.loaded'));
-    core_assert_false(sys_has_key('hdl.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('ini.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('hdl.loaded'));
     # hdl.preload.css
     core_assert_equal(sys_opt_count('hdl.preload.css'), 1);
     core_assert_equal(sys_opt_get('hdl.preload.css', 0), TEST_URL_ROOT.'/d31/d32/d33/web/s/test33.css');
@@ -674,9 +674,9 @@ function cell_n1_d4_default_test()
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/d11/d12/d13/d14/act.default.php');
     core_assert_equal(sys_opt_get('hdl.loaded', 1), get_route_root().'/d11/d12/d13/d14/tpl.default.php');
     # hdl.preload.css
-    core_assert_false(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -686,12 +686,12 @@ function cell_n2_d4_default_test()
     store_system_registry();
     core_use_handler('d21.d22.d23.d24');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -711,12 +711,12 @@ function cell_n3_d4_default_test()
     store_system_registry();
     core_use_handler('d31.d32.d33.d34');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -756,9 +756,9 @@ function cell_n1_d5_default_test()
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/d11/d12/d13/d14/d15/act.default.php');
     core_assert_equal(sys_opt_get('hdl.loaded', 1), get_route_root().'/d11/d12/d13/d14/d15/tpl.default.php');
     # hdl.preload.css
-    core_assert_false(sys_has_key('hdl.preload.css'));
+    core_assert_true(sys_has_key('hdl.preload.css'));
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     #ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -768,12 +768,12 @@ function cell_n2_d5_default_test()
     store_system_registry();
     core_use_handler('d21.d22.d23.d24.d25');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');
@@ -819,7 +819,7 @@ function cell_n2_d5_test25_test()
     core_assert_equal(sys_opt_get('hdl.preload.css', 0), TEST_URL_ROOT.'/web/s/header.css');
     core_assert_equal(sys_opt_get('hdl.preload.css', 1), TEST_URL_ROOT.'/web/s/footer.css');
     # hdl.preload.js
-    core_assert_false(sys_has_key('hdl.preload.js'));
+    core_assert_true(sys_has_key('hdl.preload.js'));
     //ndump('$SYS', $GLOBALS['SYS']);
     restore_system_registry();
 }
@@ -829,12 +829,12 @@ function cell_n3_d5_default_test()
     store_system_registry();
     core_use_handler('d31.d32.d33.d34.d35');
     # inf
-    core_assert_false(sys_has_key('inf.loaded'));
+    core_assert_true(sys_has_key('inf.loaded'));
     # ini
     core_assert_equal(sys_opt_count('ini.loaded'), 1);
     core_assert_equal(sys_opt_get('ini.loaded', 0), get_route_root().'/__init__.php');
     # api
-    core_assert_false(sys_has_key('api.loaded'));
+    core_assert_true(sys_has_key('api.loaded'));
     # hdl.loaded
     core_assert_equal(sys_opt_count('hdl.loaded'), 2);
     core_assert_equal(sys_opt_get('hdl.loaded', 0), get_route_root().'/act.default.php');

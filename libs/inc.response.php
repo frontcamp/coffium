@@ -43,6 +43,36 @@ $_H_PRELOAD_JS_INIT_POS = 0;   # hdl.preload.js initial sub-stack last position
 
 
 /**
+ * INITIALIZATION
+ * --------------
+ */
+
+function _sysreg_is_initialized()
+{
+    return sys_opt_exists('inf.loaded')
+         & sys_opt_exists('ini.loaded')
+         & sys_opt_exists('api.loaded')
+         & sys_opt_exists('lng.loaded')
+         & sys_opt_exists('hdl.loaded')
+         & sys_opt_exists('hld.preload.css')
+         & sys_opt_exists('hdl.preload.js')
+         & sys_opt_exists('route.stack');
+}
+
+function _sysreg_initialize()
+{
+    sys_opt_init('inf.loaded');
+    sys_opt_init('ini.loaded');
+    sys_opt_init('api.loaded');
+    sys_opt_init('lng.loaded');
+    sys_opt_init('hdl.loaded');
+    sys_opt_init('hdl.preload.css');
+    sys_opt_init('hdl.preload.js');
+    sys_opt_init('route.stack');
+}
+
+
+/**
  * TERMINATION API
  * ---------------
  */
@@ -425,6 +455,9 @@ function core_use_handler(
     global $_H_PRELOAD_CSS_INIT_POS,
            $_H_PRELOAD_JS_INIT_POS,
            $_ROUTE_ROOT;
+
+    # initialize system registry
+    if (!_sysreg_is_initialized()) _sysreg_initialize();
 
     $path = _route_std_path($path);
 
