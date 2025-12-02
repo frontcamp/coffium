@@ -78,7 +78,7 @@ set_error_handler('error_handler');
 
 ## Debug features
 
-if (IS_VIP) require('libs/inc.dump.php');
+if (IS_LOCAL || IS_DEV || IS_VIP) require('libs/inc.dump.php');
 
 ## Include core libraries
 
@@ -129,7 +129,9 @@ catch (CoreTerminateRoute $e)
 
 ## Run finalizers (allow registration during execution)
 
-if (IS_VIP) $_FINALIZERS_SNAPSHOT = $_FINALIZERS;  # debug
+if (IS_LOCAL || IS_DEV || IS_VIP) {
+    $_FINALIZERS_SNAPSHOT = $_FINALIZERS;  # for debug purposes
+}
 while (!empty($_FINALIZERS))
 {
     ksort($_FINALIZERS);
@@ -144,5 +146,5 @@ while (!empty($_FINALIZERS))
 
 ## Run debug helpers
 
-if (IS_VIP) require('libs/inc.helpers.php');
+if (IS_LOCAL || IS_DEV || IS_VIP) require('libs/inc.helpers.php');
 

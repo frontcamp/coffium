@@ -37,6 +37,7 @@ RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 
 RewriteRule ^favicon\.ico$ - [L]
 RewriteRule ^robots\.txt$ - [L]
-RewriteRule ^coms/.+/web(/.*)?$  - [L]
+RewriteRule ^coms/.+/web/.*\.(php|phar|phtml|cgi|pl|py|sh|exe)$ - [F,L]
+RewriteRule ^coms/.+/web(/.*)?$ - [L]
 RewriteRule ^(.*)$ index.php [L]
 
