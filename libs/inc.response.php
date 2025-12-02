@@ -318,6 +318,7 @@ function _route_std_path(string $path): string
     return ($result != '/') ? $result : '';
 }
 
+
 /**
  * COM API
  * -------
@@ -384,7 +385,6 @@ function core_com_list(): array
 
     return $result;
 }
-
 
 /**
  * Read component information by alias.
