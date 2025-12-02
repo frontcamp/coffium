@@ -34,6 +34,7 @@ if (isset($_REQUEST['phpinfo'])) phpinfo();
 if (isset($_REQUEST['dump-phpver'])) ndump('PHP_VERSION', PHP_VERSION.' ('.PHP_SAPI.')');
 if (isset($_REQUEST['dump-sysinfo'])) include('inc.sysinfo.php');
 if (isset($_REQUEST['dump-cominfo'])) include('inc.cominfo.php');
+if (isset($_REQUEST['dump-phpinfo'])) include('inc.phpinfo.php');
 if (isset($_REQUEST['dump-headers'])) ndump('getallheaders()', getallheaders());
 if (isset($_REQUEST['dump-ini'])) ndump('ini_get_all()', ini_get_all());
 
