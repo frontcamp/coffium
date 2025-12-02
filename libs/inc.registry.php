@@ -57,6 +57,7 @@ sys_opt_has_value(o,v) - checks if a value exists in an array [+strict]
 sys_opt_insert(o,p,v) - insert value at given position
 sys_opt_keys(o) - return a list of all keys
 sys_opt_values(o) - return a list of all values
+sys_opt_items(o) - return a list of all key-value items
 sys_opt_pop(o) - pop the element off the end of array
 sys_opt_shift(o) - extract first value of array
 sys_opt_push(o,v) - push one or more elements onto the end of an array
@@ -702,6 +703,16 @@ function sys_opt_values(int|string $opt): array
     if (!_sys_opt_check($opt)) throw new SysRegException(E_OPT_CORRUPT._sys_opt_state($opt));
 
     return array_values($SYS[$opt]);
+}
+
+function sys_opt_items(int|string $opt): array
+{
+    global $SYS;
+
+    if (!_sys_reg_check()) throw new SysRegException(E_REG_CORRUPT._sys_reg_state());
+    if (!_sys_opt_check($opt)) throw new SysRegException(E_OPT_CORRUPT._sys_opt_state($opt));
+
+    return $SYS[$opt];
 }
 
 function sys_opt_pop(int|string $opt): mixed

@@ -3,7 +3,7 @@ defined('INDEX') or die('Forbidden!');
 $GLOBALS['SYS']['included'][] = __FILE__;
 ?>
 
-<table width="100%" cellpadding="4" cellspacing="0" border="1">
+<table class="sysinfo" width="100%" cellpadding="4" cellspacing="0" border="1">
     <thead>
         <tr>
             <th>Parameter</th>
@@ -96,21 +96,6 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><th colspan="2"><h2>Request</h2></th></tr>
 
         <tr><td>IS_AJAX</td><td><?=bool_to_yesno(IS_AJAX)?></td></tr>
-<? foreach(sys('request') as $key => $value): ?>
-        <tr><td>$SYS['request']['<?=$key?>']</td><td><?=$value?></td></tr>
-<? endforeach ?>
-        <tr><td>$SYS['route.path_raw']</td><td><?=sys('route.path_raw')?></td></tr>
-        <tr><td>$SYS['route.path']</td><td><?=sys('route.path')?></td></tr>
-        <tr><td>$SYS['route.chunks_raw']</td><td>
-<? foreach(sys('route.chunks_raw') as $chunk): ?>
-            <span><?=$chunk?>,</span>
-<? endforeach ?>
-        </td></tr>
-        <tr><td>$SYS['route.chunks']</td><td>
-<? foreach(sys('route.chunks') as $chunk): ?>
-            <span><?=$chunk?>,</span>
-<? endforeach ?>
-        </td></tr>
 
         <tr><th colspan="2"><h2>COM API</h2></th></tr>
 
@@ -118,27 +103,30 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><td>COM_INF_FNAME</td><td><?=COM_INF_FNAME?></td></tr>
         <tr><td>DEF_API_FNAME</td><td><?=DEF_API_FNAME?></td></tr>
 
-        <tr><th colspan="2"><h2>Stacked Data</h2></th></tr>
-        <tr><td>$SYS['included']</td><td>
-<? foreach(($SYS['included'] ?? array()) as $file_path): ?>
-            <span><?=$file_path?></span><br>
+        <tr><th colspan="2"><h2>System Registry</h2></th></tr>
+
+<? foreach($GLOBALS['SYS'] as $key => $value): ?>
+        <tr>
+            <td class="reg-key"><?=htmlspecialchars($key)?></td>
+            <td>
+<?     if (is_array($value)): ?>
+<?         foreach($value as $opt_key => $opt_value): ?>
+                <span class="opt-key"><?=htmlspecialchars($opt_key)?></span>
+                <span class="opt-sep">=&gt;</span>
+<?             if (is_array($opt_value)): ?>
+                <span class="opt-val">(Array)</span>
+<?             else: ?>
+                <span class="opt-val"><?=htmlspecialchars((string)$opt_value)?></span>
+<?             endif ?>
+                <br>
+<?         endforeach ?>
+<?     else: ?>
+                <span class="reg-value"><?=htmlspecialchars((string)$value)?></span>
+<?     endif ?>
+            </td>
+        </tr>
 <? endforeach ?>
-        </td></tr>
-        <tr><td>$SYS['ini.loaded']</td><td>
-<? foreach(($SYS['ini.loaded'] ?? array()) as $file_path): ?>
-            <span><?=$file_path?></span><br>
-<? endforeach ?>
-        </td></tr>
-        <tr><td>$SYS['hdl.preload.css']</td><td>
-<? foreach(($SYS['hdl.preload.css'] ?? array()) as $file_path): ?>
-            <span><?=$file_path?></span><br>
-<? endforeach ?>
-        </td></tr>
-        <tr><td>$SYS['hdl.preload.js']</td><td>
-<? foreach(($SYS['hdl.preload.css'] ?? array()) as $file_path): ?>
-            <span><?=$file_path?></span><br>
-<? endforeach ?>
-        </td></tr>
+
     </tbody>
 </table>
 
