@@ -100,9 +100,10 @@ $CONTENT_TYPE = htmlspecialchars($cttype, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8');
         <tr><th colspan="2"><h2>COM API</h2></th></tr>
 
         <tr><td>DEF_HDL_FNAME</td><td><?=DEF_HDL_FNAME?></td></tr>
-        <tr><td>COM_INI_FNAME</td><td><?=COM_INI_FNAME?></td></tr>
         <tr><td>COM_INF_FNAME</td><td><?=COM_INF_FNAME?></td></tr>
-        <tr><td>DEF_API_FNAME</td><td><?=DEF_API_FNAME?></td></tr>
+        <tr><td>COM_INI_FNAME</td><td><?=COM_INI_FNAME?></td></tr>
+        <tr><td>COM_API_FNAME</td><td><?=COM_API_FNAME?></td></tr>
+        <tr><td>COM_DEF_ORDER</td><td><?=COM_DEF_ORDER?></td></tr>
 
         <tr><th colspan="2"><h2>System Registry</h2></th></tr>
 

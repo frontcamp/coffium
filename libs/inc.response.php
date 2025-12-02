@@ -31,9 +31,10 @@ define('HDL_ACT_TPL_CSS_JS', HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS);
 define('HDL_ALL', HDL_ACT_TPL_CSS_JS);  # synonym
 
 define('DEF_HDL_FNAME', 'default');
-define('COM_INI_FNAME', '__init__.php');
 define('COM_INF_FNAME', '__info__.php');
-define('DEF_API_FNAME', 'api.main.php');
+define('COM_INI_FNAME', '__init__.php');
+define('COM_API_FNAME', 'api.main.php');
+define('COM_DEF_ORDER', 999);
 
 define('HDL_TRY_DEF', 32);  # append DEF_HDL_FNAME to path first
 define('HDL_ASC_DEF', 64);  # ascent to top default on fail
@@ -220,8 +221,8 @@ function store_route_root(): string
 
 
 /**
- * COMMON
- * ------
+ * COMMON FUNCTIONALITY
+ * --------------------
  */
 
 /**
@@ -318,6 +319,129 @@ function _route_std_path(string $path): string
 }
 
 /**
+ * COM API
+ * -------
+ */
+
+/**
+ * Discover all valid components under /coms.
+ *
+ * A component is considered valid if:
+ *  - it is a direct subdirectory of COMS_ROOT;
+ *  - it contains component information file (COM_INF_FNAME);
+ *  - this file defines $CINF['alias'] equal to directory name.
+ *
+ * Components are grouped by $CINF['order'] (ascending). If "order" key is
+ * missing, its value is assumed to be COM_DEF_ORDER. Components with
+ * the same "order" keep their original discovery order.
+ *
+ * @return array List of component aliases.
+ */
+function core_com_list(): array
+{
+    $components = array();
+
+    if (!is_dir(COMS_ROOT)) return array();
+
+    $items = scandir(COMS_ROOT, SCANDIR_SORT_NONE);
+    if ($items === false) return array();
+
+    foreach ($items as $entry)
+    {
+        if ($entry === '.' || $entry === '..') continue;
+
+        $component_dir = path_normjoin(COMS_ROOT, $entry);
+        if (!is_dir($component_dir)) continue;
+
+        $info_file = path_normjoin(COMS_ROOT, $entry, COM_INF_FNAME);
+        if (!is_file($info_file)) continue;
+
+        /** @var array $CINF */
+        $CINF = file_get_data($info_file, 'CINF');
+
+        if (!is_array($CINF)) continue;
+
+        $alias = $CINF['alias'] ?? null;
+        if (!is_string($alias) || $alias !== $entry) continue;
+
+        $order = COM_DEF_ORDER;
+        if (array_key_exists('order', $CINF)
+         && is_numeric($CINF['order'])) {
+            $order = (int)$CINF['order'];
+        }
+
+        $components[$order][] = $alias;
+    }
+
+    if (!$components) return array();
+
+    ksort($components, SORT_NUMERIC);
+
+    $result = array();
+    foreach ($components as $aliases) {
+        $result = array_merge($result, $aliases);
+    }
+
+    return $result;
+}
+
+
+/**
+ * Read component information by alias.
+ *
+ * Returns CINF array for valid component or null if:
+ *  - component directory does not exist;
+ *  - info file does not exist;
+ *  - CINF is not defined as array in info file;
+ *  - CINF['alias'] is missing or does not match requested alias.
+ *
+ * @param string $com_alias Component alias (directory name under /coms).
+ * @return array|null
+ */
+function core_com_info(string $com_alias): ?array
+{
+    $alias = trim($com_alias);
+    if ($alias === '') return null;
+
+    $component_dir = path_normjoin(COMS_ROOT, $alias);
+    if (!is_dir($component_dir)) return null;
+
+    $info_file = path_normjoin($component_dir, COM_INF_FNAME);
+    if (!is_file($info_file)) return null;
+
+    /** @var array $CINF */
+    $CINF = file_get_data($info_file, 'CINF');
+
+    if (!is_array($CINF)
+     || !array_key_exists('alias', $CINF)
+     || $CINF['alias'] !== $alias)
+    {
+        return null;
+    }
+
+    $CINF_FULL = array
+    (
+        'alias'   => $com_alias,
+        'title'   => $CINF['title']   ?? '',
+        'descr'   => $CINF['descr']   ?? '',
+        'prefix'  => $CINF['prefix']  ?? '',
+        'require' => $CINF['require'] ?? array(),
+        'version' => $CINF['version'] ?? '',
+        'build'   => $CINF['build']   ?? '',
+        'order'   => $CINF['order']   ?? '',
+    );
+
+    if (!is_array($CINF_FULL['require'])) {
+        $CINF_FULL['require'] = array();
+    }
+
+    $CINF_FULL['require_str'] = implode(', ', $CINF_FULL['require']);
+
+    return $CINF_FULL;
+}
+
+
+/**
  * ROUTING API
  * -----------
  */
@@ -362,7 +486,7 @@ function core_use_api(string $target_path): void
         $lng_path = $_ROUTE_ROOT.$path.'/_lang';
         $inf_file = _route_mk_path($_ROUTE_ROOT, $path, COM_INF_FNAME);
         $ini_file = _route_mk_path($_ROUTE_ROOT, $path, COM_INI_FNAME);
-        $api_file = _route_mk_path($_ROUTE_ROOT, $path, DEF_API_FNAME);
+        $api_file = _route_mk_path($_ROUTE_ROOT, $path, COM_API_FNAME);
 
         # LNG files can be on any level
         if (ML_DIR_SUPPORT

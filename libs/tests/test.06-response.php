@@ -245,9 +245,10 @@ function response_constants_test()
     core_assert_const_and_same('HDL_ALL', HDL_ACT | HDL_TPL | HDL_CSS | HDL_JS);
 
     core_assert_const_and_same('DEF_HDL_FNAME', 'default');
-    core_assert_const_and_same('COM_INI_FNAME', '__init__.php');
     core_assert_const_and_same('COM_INF_FNAME', '__info__.php');
-    core_assert_const_and_same('DEF_API_FNAME', 'api.main.php');
+    core_assert_const_and_same('COM_INI_FNAME', '__init__.php');
+    core_assert_const_and_same('COM_API_FNAME', 'api.main.php');
+    core_assert_const_and_same('COM_DEF_ORDER', 999);
 
     core_assert_const_and_same('HDL_TRY_DEF', 32);
     core_assert_const_and_same('HDL_ASC_DEF', 64);
