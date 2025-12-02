@@ -151,7 +151,8 @@ if (!isset($_SESSION['core.vip_access']))  # init
     $_SESSION['core.vip_access'] = false;
 }
 
-if (isset($_REQUEST[VIP_MODE_KEY]))  # override from request
+if (isset($_REQUEST[VIP_MODE_KEY])
+&& !empty($_REQUEST[VIP_MODE_KEY]))
 {
     $vip_mode_raw = strtolower($_REQUEST[VIP_MODE_KEY]);
     $_SESSION['core.vip_access'] = in_array($vip_mode_raw, array(1, '1', 'on', 'yes', 'true'), true);
